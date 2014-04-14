@@ -2,6 +2,7 @@ package com.example.polyucloud.app;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,7 +40,19 @@ public class ListContent extends Activity {
         if (id == R.id.action_settings) {
             return true;
         }
+
+        if (id == R.id.action_upload) {
+            //callFileSelectDialog();
+            Intent intent = new Intent(this, UploadFile.class);
+            startActivity(intent);
+
+            return true;
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void callFileSelectDialog() {
+
     }
 
 }
