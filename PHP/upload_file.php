@@ -1,12 +1,9 @@
-<?php
-
-    $objFile = & $_FILES["file"];
-    $strPath = basename( $objFile["name"] );
-
-    if( move_uploaded_file( $objFile["tmp_name"], $strPath ) ) {
-        print "The file " .  $strPath . " has been uploaded.";
-    } else {
-        print "There was an error uploading the file, please try again!";
+<?php  
+    $target_path  = "../user_files/";
+    $target_path = $target_path . basename( $_FILES['uploadedfile']['name']);
+    if(move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $target_path)) {
+       echo "The file ".  basename( $_FILES['uploadedfile']['name']). " has been uploaded";
+    }  else{
+       echo "There was an error uploading the file, please try again!" . $_FILES['uploadedfile']['error'];
     }
-
 ?>
