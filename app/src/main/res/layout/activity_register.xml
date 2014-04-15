@@ -18,6 +18,7 @@
         <EditText
             android:layout_marginLeft="5dp"
             android:layout_width="fill_parent"
+            android:id="@+id/txtRegFstName"
             android:layout_height="wrap_content" />
     </LinearLayout>
     <LinearLayout
@@ -30,6 +31,7 @@
             android:text="LastName"/>
         <EditText
             android:layout_marginLeft="5dp"
+            android:id="@+id/txtRegLstName"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>
@@ -44,6 +46,7 @@
         <EditText
             android:layout_marginLeft="5dp"
             android:layout_width="fill_parent"
+            android:id="@+id/txtRegEmail"
             android:layout_height="wrap_content" />
     </LinearLayout>
     <LinearLayout
@@ -56,12 +59,15 @@
             android:text="Password"/>
         <EditText
             android:layout_width="fill_parent"
+            android:password="true"
             android:layout_marginLeft="5dp"
+            android:id="@+id/txtRegPassword"
             android:layout_height="wrap_content" />
     </LinearLayout>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:onClick="register"
         android:text="Register"/>
 </LinearLayout>

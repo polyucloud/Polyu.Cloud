@@ -17,9 +17,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="User:"/>
+                android:text="Email:"/>
             <EditText
                 android:layout_width="fill_parent"
+                android:id="@+id/txtLogEmail"
                 android:layout_height="wrap_content"/>
     </LinearLayout>
     <LinearLayout
@@ -32,8 +33,16 @@
             android:text="Password:"/>
         <EditText
             android:layout_width="fill_parent"
+            android:id="@+id/txtLogPassword"
+            android:password="true"
             android:layout_height="wrap_content"/>
     </LinearLayout>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:onClick="login"
+        android:text="Login"/>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_gravity="center"
@@ -51,7 +60,7 @@
             android:layout_marginLeft="5dp"
             android:text="@string/register_now"
             android:clickable="true"
-            android:onClick="onClick"
+            android:onClick="register"
             />
     </LinearLayout>
 </LinearLayout>
