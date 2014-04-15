@@ -18,7 +18,7 @@ public class LoginActivity extends Activity{
     }
     public void onClick(View v) {
         Intent intent = new Intent(this, RegisterActivity.class);
-        startActivity(intent);//s
+        startActivity(intent);
 
     }
 
