@@ -1,7 +1,9 @@
 package com.example.polyucloud.app;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Bundle;
@@ -9,55 +11,81 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.ListView;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
-
-import java.io.ByteArrayInputStream;
-import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
+
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.List;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Stack;
 
 
-public class UploadFile extends Activity implements View.OnClickListener {
+public class UploadFile extends Activity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
-    private String uploadFile = Environment.getExternalStorageDirectory().toString()+"/Download/test.txt";
+    private ArrayList<HashMap> fileList = null;
+    private ListView fileListView;
+    public File uploadFile;
     Button testUp;
+
+    private FileListAdapter fileListAdapter = null;
+
+    private Stack<File> pastFolder = new Stack<File>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_upload_file);
         init();
-        Log.i("File want to upload:", uploadFile);
+        //Log.i("File want to upload:", uploadFile);
     }
 
     private void init() {
+        fileList = new ArrayList<HashMap>();
+        fileListView = (ListView) findViewById(R.id.sd_file_list);
+        fileListView.setOnItemClickListener(this);
         testUp = (Button) findViewById(R.id.test_upload);
         testUp.setOnClickListener(this);
+
+        File sdcard = Environment.getExternalStorageDirectory();
+        obtainSDfiles(sdcard);
+        fileListAdapter = new FileListAdapter(this, fileList);
+        fileListView.setAdapter(fileListAdapter);
+    }
+
+    private void obtainSDfiles(File target) {
+
+        File dirs = new File(target.getAbsolutePath());
+
+        Log.i("SD Card path:", dirs.toString());
+
+        if(dirs.exists()) {
+            File[] files = dirs.listFiles();
+
+            for (File f:files) {
+                HashMap item = new HashMap();
+
+                item.put("f_name", f.getName());
+                item.put("f_path", f);
+                item.put("f_parent", dirs);
+
+                if(f.isDirectory()) {
+                    item.put("f_type", "DIR");
+                } else {
+                    item.put("f_type", "FILE");
+                }
+                fileList.add(item);
+                Log.i("File:", f.toString());
+            }
+        }
     }
 
 
@@ -67,6 +95,18 @@ public class UploadFile extends Activity implements View.OnClickListener {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.upload_file, menu);
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(pastFolder.size() > 0) {
+            File f = pastFolder.pop();
+            fileList.clear();
+            obtainSDfiles( f );
+            fileListAdapter.notifyDataSetChanged();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -88,8 +128,8 @@ public class UploadFile extends Activity implements View.OnClickListener {
             case R.id.test_upload:
 
                 /** Call AsyncTask to upload file at background **/
-                FileUploadTask fileUploadTask = new FileUploadTask(uploadFile);
-                fileUploadTask.execute();
+                //FileUploadTask fileUploadTask = new FileUploadTask(uploadFile);
+                //fileUploadTask.execute();
                 //test_ListFile();
                 break;
         }
@@ -110,12 +150,60 @@ public class UploadFile extends Activity implements View.OnClickListener {
         }
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        File f = (File) fileList.get(i).get("f_path");
+
+        String f_type = (String) fileList.get(i).get("f_type");
+        if(f_type.equalsIgnoreCase("DIR")) {
+            //File f = (File) fileList.get(i).get("f_path");
+
+            pastFolder.push(f.getParentFile());
+
+            fileList.clear();
+            obtainSDfiles( f );
+            fileListAdapter.notifyDataSetChanged();
+        } else {
+            uploadFile = f;
+            comfirmUpload();
+        }
+    }
+
+    private void comfirmUpload() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(UploadFile.this);
+
+        // Setting Dialog Title
+        alertDialog.setTitle("Confirm upload...");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("Do you want to upload this file?");
+
+        // Setting Positive "Yes" Button
+        alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // User pressed YES button. Write Logic Here
+                FileUploadTask fileUploadTask = new FileUploadTask(uploadFile);
+                fileUploadTask.execute();
+            }
+        });
+
+        // Setting Negative "NO" Button
+        alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // User pressed No button. Write Logic Here
+                //Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+    }
+
     /** AsyncTask to upload file to server **/
     class FileUploadTask extends AsyncTask<Object, Integer, Void> {
 
         private ProgressDialog progressDialog = null;
-        private String uploadFile;
-        private File upFile;
+        private File uploadFile;
         private String uploadPhpPage = "http://daisunhong.com/polyucloud/php/upload_file.php";
         private String boundary = "*****";
         private String lineEnd = "\r\n";
@@ -126,7 +214,7 @@ public class UploadFile extends Activity implements View.OnClickListener {
 
         HttpURLConnection connection = null;
 
-        FileUploadTask(String uploadFile) {
+        FileUploadTask(File uploadFile) {
             this.uploadFile = uploadFile;
         }
 
@@ -144,14 +232,14 @@ public class UploadFile extends Activity implements View.OnClickListener {
         @Override
         protected Void doInBackground(Object... objects) {
 
-            upFile = new File(uploadFile);
+            //upFile = new File(uploadFile);
 
             long length = 0;
             int progress;
             int bytesRead, bytesAvailable, bufferSize;
             byte[] buffer;
             int maxBufferSize = 256 * 1024; // 256KB
-            long totalSize = upFile.length();
+            long totalSize = uploadFile.length();
 
             try {
                 URL url = new URL(uploadPhpPage);
@@ -170,7 +258,7 @@ public class UploadFile extends Activity implements View.OnClickListener {
                 connection.setRequestProperty("Charset", "UTF-8");
                 connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);  //boundary used to split multipart data
 
-                FileInputStream fileInputStream = new FileInputStream(upFile);
+                FileInputStream fileInputStream = new FileInputStream(uploadFile);
 
                 outputStream = new DataOutputStream(connection.getOutputStream());
                 outputStream.writeBytes(twoHyphens + boundary + lineEnd);

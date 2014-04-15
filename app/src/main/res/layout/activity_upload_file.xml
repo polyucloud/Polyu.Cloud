@@ -4,8 +4,10 @@
     android:orientation="vertical">
 
     <ListView
+        android:id="@+id/sd_file_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:scrollbars="vertical"
         android:layout_weight="5">
 
         </ListView>
