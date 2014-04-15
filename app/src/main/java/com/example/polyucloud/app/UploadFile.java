@@ -70,6 +70,7 @@ public class UploadFile extends Activity implements View.OnClickListener, Adapte
         if(dirs.exists()) {
             File[] files = dirs.listFiles();
 
+            if(files!=null)
             for (File f:files) {
                 HashMap item = new HashMap();
 
