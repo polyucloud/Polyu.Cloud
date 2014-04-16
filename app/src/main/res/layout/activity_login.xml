@@ -5,48 +5,52 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
     <ImageView
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_height="100dp"
-        android:layout_weight="1"
-        android:src="@drawable/icon" />
-    <LinearLayout
-        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_weight="1"
+        android:layout_margin="20dp"
+        android:src="@drawable/icon" />
+    <TableLayout
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:stretchColumns="1">
+        <TableRow>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Email:"/>
+                android:text="Email"/>
             <EditText
                 android:layout_width="fill_parent"
                 android:id="@+id/txtLogEmail"
                 android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Password:"/>
-        <EditText
-            android:layout_width="fill_parent"
-            android:id="@+id/txtLogPassword"
-            android:password="true"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+        </TableRow>
+        <TableRow>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Password"/>
+            <EditText
+                android:layout_width="fill_parent"
+                android:id="@+id/txtLogPassword"
+                android:password="true"
+                android:layout_height="wrap_content"/>
+        </TableRow>
+    </TableLayout>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_margin="10dp"
         android:onClick="login"
         android:text="Login"/>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_gravity="center"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp">
         <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

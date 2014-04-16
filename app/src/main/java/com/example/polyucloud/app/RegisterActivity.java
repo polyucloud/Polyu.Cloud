@@ -1,12 +1,11 @@
 package com.example.polyucloud.app;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,14 +26,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class RegisterActivity extends ActionBarActivity {
+/**
+ * Created by Tom on 4/14/14.
+ */
+public class RegisterActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
     }
-
 
     class RegisterTask extends AsyncTask<HashMap<String, String>, Void, Integer> {
         private ProgressDialog progressDialog = null;
@@ -131,8 +132,7 @@ public class RegisterActivity extends ActionBarActivity {
         }
     }
 
-    public void register(View view)
-    {
+    public void register(View view){
         String fstName = ((EditText)findViewById(R.id.txtRegFstName)).getText().toString();
         String lstName = ((EditText)findViewById(R.id.txtRegLstName)).getText().toString();
         String email = ((EditText)findViewById(R.id.txtRegEmail)).getText().toString();
@@ -172,14 +172,6 @@ public class RegisterActivity extends ActionBarActivity {
             map.put("password" , password);
             new RegisterTask().execute(map);
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.register, menu);
-        return true;
     }
 
     @Override

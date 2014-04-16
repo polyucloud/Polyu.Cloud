@@ -15,7 +15,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +28,7 @@ import java.util.HashMap;
 import java.util.Stack;
 
 
-public class UploadFile extends Activity implements View.OnClickListener, AdapterView.OnItemClickListener {
+public class UploadActivity extends Activity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
     private ArrayList<HashMap> fileList = null;
     private ListView fileListView;
@@ -171,7 +170,7 @@ public class UploadFile extends Activity implements View.OnClickListener, Adapte
     }
 
     private void comfirmUpload() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(UploadFile.this);
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(UploadActivity.this);
 
         // Setting Dialog Title
         alertDialog.setTitle("Confirm upload...");
@@ -222,7 +221,7 @@ public class UploadFile extends Activity implements View.OnClickListener, Adapte
         @Override
         protected void onPreExecute() {
             Log.i("Infor:", "start background task to upload file");
-            progressDialog = new ProgressDialog(UploadFile.this);
+            progressDialog = new ProgressDialog(UploadActivity.this);
             progressDialog.setMessage("Uploading");
             progressDialog.setIndeterminate(false); //Disable Indeterminate effect
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);

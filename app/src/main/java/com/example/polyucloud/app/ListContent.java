@@ -43,7 +43,7 @@ public class ListContent extends Activity {
 
         if (id == R.id.action_upload) {
             //callFileSelectDialog();
-            Intent intent = new Intent(this, UploadFile.class);
+            Intent intent = new Intent(this, UploadActivity.class);
             startActivity(intent);
 
             return true;

@@ -1,14 +1,11 @@
 package com.example.polyucloud.app;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.content.Intent;
 import android.widget.EditText;
@@ -33,11 +30,13 @@ import java.util.List;
  * Created by Tom on 4/14/14.
  */
 public class LoginActivity extends Activity{
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
     }
+
     public void register(View v) {
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
@@ -52,6 +51,7 @@ public class LoginActivity extends Activity{
         map.put("password" , password);
         new LoginTask().execute(map);
     }
+
     class LoginTask extends AsyncTask<HashMap<String, String>, Void, Integer> {
         private ProgressDialog progressDialog = null;
         @Override
