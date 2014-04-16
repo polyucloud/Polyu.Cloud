@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -31,10 +30,13 @@ import java.util.List;
  */
 public class RegisterActivity extends Activity {
 
+    private CloudBackupApplication app = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        app = (CloudBackupApplication)this.getApplication();
     }
 
     class RegisterTask extends AsyncTask<HashMap<String, String>, Void, Integer> {
@@ -53,7 +55,7 @@ public class RegisterActivity extends Activity {
         protected Integer doInBackground(HashMap<String, String>... maps) {
             HashMap<String, String> data = maps[0];
             HttpClient httpclient = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost("http://daisunhong.com/polyucloud/php/register.php");
+            HttpPost httppost = new HttpPost(app.PHP_ROOT_URL+"register.php");
             try {
                 // Add your data
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
@@ -137,7 +139,7 @@ public class RegisterActivity extends Activity {
         String lstName = ((EditText)findViewById(R.id.txtRegLstName)).getText().toString();
         String email = ((EditText)findViewById(R.id.txtRegEmail)).getText().toString();
         String password = ((EditText)findViewById(R.id.txtRegPassword)).getText().toString();
-        if(fstName.length()<=0 || fstName.length()<= 0|| fstName.length()<= 0 || fstName.length()<=0){
+        if(fstName.length()<=0 || lstName.length()<= 0|| email.length()<= 0 || password.length()<=0){
             new AlertDialog.Builder(RegisterActivity.this)
                     .setTitle("Error")
                     .setMessage("Not null is not allowed.")

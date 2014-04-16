@@ -6,6 +6,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.JsonReader;
+import android.util.Log;
 import android.view.View;
 import android.content.Intent;
 import android.widget.EditText;
@@ -20,8 +22,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +38,13 @@ import java.util.List;
  */
 public class LoginActivity extends Activity{
 
+    private CloudBackupApplication app = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        app = (CloudBackupApplication)this.getApplication();
     }
 
     public void register(View v) {
@@ -52,7 +62,7 @@ public class LoginActivity extends Activity{
         new LoginTask().execute(map);
     }
 
-    class LoginTask extends AsyncTask<HashMap<String, String>, Void, Integer> {
+    class LoginTask extends AsyncTask<HashMap<String, String>, Void, String> {
         private ProgressDialog progressDialog = null;
         @Override
         protected void onPreExecute()
@@ -65,10 +75,10 @@ public class LoginActivity extends Activity{
         }
 
         @Override
-        protected Integer doInBackground(HashMap<String, String>... maps) {
+        protected String doInBackground(HashMap<String, String>... maps) {
             HashMap<String, String> data = maps[0];
             HttpClient httpclient = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost("http://daisunhong.com/polyucloud/php/login.php");
+            HttpPost httppost = new HttpPost(app.PHP_ROOT_URL+"login.php");
             try {
                 // Add your data
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
@@ -79,51 +89,66 @@ public class LoginActivity extends Activity{
                 // Execute HTTP Post Request
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
-                String responseString = EntityUtils.toString(entity, "UTF-8");
-                int responseInt = Integer.parseInt(responseString);
-                return responseInt;
-
+                return EntityUtils.toString(entity, "UTF-8");
             }
-            catch (ClientProtocolException e) { return -4; }
-            catch (IOException e) { return -4; }
-            catch (Exception e) { return -4; }
+            catch (ClientProtocolException e) { return null; }
+            catch (IOException e) { return null; }
         }
 
         @Override
         protected void onProgressUpdate(Void... voids) {}
 
         @Override
-        protected void onPostExecute(Integer result) {
-            if(result>0)
-            {
-                new AlertDialog.Builder(LoginActivity.this)
-                        .setTitle("Login")
-                        .setMessage("Loginnnnn")
-                        .setCancelable(false)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                                progressDialog.hide();
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_info)
-                        .show();
-            }
+        protected void onPostExecute(String jsonString) {
+            Log.d("Tom", jsonString);
+            if(jsonString == null)
+                showErrorDialog("Error", "Connection error.");
             else
             {
-                new AlertDialog.Builder(LoginActivity.this)
-                        .setTitle("Account not exist")
-                        .setMessage("Email is not exist or password is error.")
-                        .setCancelable(false)
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                                progressDialog.hide();
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
+                try
+                {
+                    JSONObject root = new JSONObject(jsonString);
+                    if(root.getInt("response")==1)
+                    {
+                        if(root.getInt("count")<=0)
+                            showErrorDialog("Error", "Email or password is wrong.");
+                        else
+                        {
+                            JSONObject userObj = root.getJSONArray("result").getJSONObject(0);
+                            app.currentSession = new CloudBackupApplication.Session(
+                                    userObj.getInt("id"),
+                                    userObj.getString("email"),
+                                    userObj.getString("first_name"),
+                                    userObj.getString("last_name"));
+                            progressDialog.hide();
+                            Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                            startActivity(intent);
+                        }
+                    }
+                    else
+                        showErrorDialog("Error","Response error.");
+                }
+                catch (JSONException e)
+                {
+                    showErrorDialog("Error","Response format error.");
+                }
             }
+        }
+
+        private void showErrorDialog(String title, String message)
+        {
+            new AlertDialog.Builder(LoginActivity.this)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setCancelable(false)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            progressDialog.hide();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
         }
     }
 

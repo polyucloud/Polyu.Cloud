@@ -8,12 +8,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class ListContent extends Activity {
+public class ListActivity extends Activity {
+
+    private CloudBackupApplication app = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_content);
+        app = (CloudBackupApplication)this.getApplication();
         init();
     }
 

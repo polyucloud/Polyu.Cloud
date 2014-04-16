@@ -2,7 +2,6 @@ package com.example.polyucloud.app;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -51,7 +50,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.login:
-                Intent intent = new Intent(this, ListContent.class);
+                Intent intent = new Intent(this, ListActivity.class);
                 startActivity(intent);
                 break;
         }
