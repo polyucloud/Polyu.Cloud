@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.content.Intent;
@@ -22,13 +21,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -120,7 +116,7 @@ public class LoginActivity extends Activity{
                                     userObj.getString("first_name"),
                                     userObj.getString("last_name"));
                             progressDialog.hide();
-                            Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                            Intent intent = new Intent(LoginActivity.this, CloudListActivity.class);
                             startActivity(intent);
                         }
                     }

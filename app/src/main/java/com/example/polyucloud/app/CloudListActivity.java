@@ -8,28 +8,27 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class ListActivity extends Activity {
-
+public class CloudListActivity extends Activity {
     private CloudBackupApplication app = null;
+    private CloudExplorer explorer = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_content);
+        setContentView(R.layout.activity_cloud_list);
         app = (CloudBackupApplication)this.getApplication();
-        init();
+        explorer = CloudExplorer.instantiateFromSession(app.currentSession);
+        initActionBar();
     }
 
-    protected void init() {
+    protected void initActionBar() {
         ActionBar actionBar = getActionBar();
         actionBar.show();
-        //asc
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.list_content, menu);
         return super.onCreateOptionsMenu(menu);
@@ -40,23 +39,16 @@ public class ListActivity extends Activity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        switch(item.getItemId())
+        {
+            case R.id.action_upload:
+                Intent intent = new Intent(this, UploadActivity.class);
+                startActivity(intent);
+
+            case R.id.action_add_folder:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        if (id == R.id.action_upload) {
-            //callFileSelectDialog();
-            Intent intent = new Intent(this, UploadActivity.class);
-            startActivity(intent);
-
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
-
-    private void callFileSelectDialog() {
-
-    }
-
 }

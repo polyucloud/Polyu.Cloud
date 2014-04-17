@@ -22,7 +22,7 @@
             android:label="@string/title_activity_register" >
         </activity>
         <activity
-            android:name=".ListActivity"
+            android:name=".CloudListActivity"
             android:logo="@drawable/cloud"
             android:label="@string/title_activity_list_content">
         </activity>
