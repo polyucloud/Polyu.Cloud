@@ -2,10 +2,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.polyucloud.app.ListActivity" >
-
     <item android:id="@+id/action_upload"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/upload"
         android:showAsAction="always"
-        android:title="Upload" />
-
+        android:title="Upload file"/>
+    <item android:id="@+id/action_add_folder"
+        android:icon="@drawable/add_folder"
+        android:showAsAction="always"
+        android:title="Add folder"/>
 </menu>
