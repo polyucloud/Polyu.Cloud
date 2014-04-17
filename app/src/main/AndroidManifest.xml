@@ -30,7 +30,5 @@
             android:name=".UploadActivity"
             android:label="@string/title_activity_upload_file" >
         </activity>
-
     </application>
-
 </manifest>
