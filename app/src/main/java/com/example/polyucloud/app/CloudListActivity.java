@@ -2,15 +2,18 @@ package com.example.polyucloud.app;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class CloudListActivity extends Activity {
+public class CloudListActivity extends Activity implements CloudExplorer.Listener{
     private CloudBackupApplication app = null;
     private CloudExplorer explorer = null;
+    private ProgressDialog progressDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,14 +21,28 @@ public class CloudListActivity extends Activity {
         setContentView(R.layout.activity_cloud_list);
         app = (CloudBackupApplication)this.getApplication();
         explorer = CloudExplorer.instantiateFromSession(app.currentSession);
-        initActionBar();
-    }
-
-    protected void initActionBar() {
+        explorer.addListener(this);
         ActionBar actionBar = getActionBar();
         actionBar.show();
     }
 
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        progressDialog = new ProgressDialog(CloudListActivity.this);
+        progressDialog.setMessage("Retrieving list....");
+        progressDialog.setIndeterminate(false);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        explorer.start();
+    }
+
+    @Override
+    public void explorerStarted(String str) {
+        Log.d("Tom", str);
+        progressDialog.dismiss();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

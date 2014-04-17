@@ -115,7 +115,7 @@ public class LoginActivity extends Activity{
                                     userObj.getString("email"),
                                     userObj.getString("first_name"),
                                     userObj.getString("last_name"));
-                            progressDialog.hide();
+                            progressDialog.dismiss();
                             Intent intent = new Intent(LoginActivity.this, CloudListActivity.class);
                             startActivity(intent);
                         }
@@ -139,7 +139,7 @@ public class LoginActivity extends Activity{
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.cancel();
-                            progressDialog.hide();
+                            progressDialog.dismiss();
                         }
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)

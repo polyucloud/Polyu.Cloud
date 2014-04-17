@@ -48,7 +48,7 @@ public class RegisterActivity extends Activity {
         protected void onPreExecute()
         {
             progressDialog = new ProgressDialog(RegisterActivity.this);
-            progressDialog.setMessage("Registering");
+            progressDialog.setMessage("Registering....");
             progressDialog.setIndeterminate(false);
             progressDialog.setCancelable(false);
             progressDialog.show();
@@ -104,7 +104,7 @@ public class RegisterActivity extends Activity {
                                     .setPositiveButton("Return to Login", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
                                             dialog.cancel();
-                                            progressDialog.hide();
+                                            progressDialog.dismiss();
                                             RegisterActivity.this.finish();
                                         }
                                     })
@@ -131,7 +131,7 @@ public class RegisterActivity extends Activity {
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.cancel();
-                            progressDialog.hide();
+                            progressDialog.dismiss();
                         }
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)
