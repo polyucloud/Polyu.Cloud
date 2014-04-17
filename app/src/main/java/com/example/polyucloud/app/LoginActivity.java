@@ -37,7 +37,6 @@ import java.util.List;
  * Created by Tom on 4/14/14.
  */
 public class LoginActivity extends Activity{
-
     private CloudBackupApplication app = null;
 
     @Override
@@ -126,7 +125,7 @@ public class LoginActivity extends Activity{
                         }
                     }
                     else
-                        showErrorDialog("Error","Response error.");
+                        showErrorDialog("Error","Response error: "+root.getInt("response"));
                 }
                 catch (JSONException e)
                 {
@@ -151,5 +150,4 @@ public class LoginActivity extends Activity{
                     .show();
         }
     }
-
 }

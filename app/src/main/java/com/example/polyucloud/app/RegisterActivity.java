@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -19,6 +21,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.*;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +33,6 @@ import java.util.List;
  * Created by Tom on 4/14/14.
  */
 public class RegisterActivity extends Activity {
-
     private CloudBackupApplication app = null;
 
     @Override
@@ -39,7 +42,7 @@ public class RegisterActivity extends Activity {
         app = (CloudBackupApplication)this.getApplication();
     }
 
-    class RegisterTask extends AsyncTask<HashMap<String, String>, Void, Integer> {
+    class RegisterTask extends AsyncTask<HashMap<String, String>, Void, String> {
         private ProgressDialog progressDialog = null;
         @Override
         protected void onPreExecute()
@@ -52,7 +55,7 @@ public class RegisterActivity extends Activity {
         }
 
         @Override
-        protected Integer doInBackground(HashMap<String, String>... maps) {
+        protected String doInBackground(HashMap<String, String>... maps) {
             HashMap<String, String> data = maps[0];
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(app.PHP_ROOT_URL+"register.php");
@@ -68,14 +71,10 @@ public class RegisterActivity extends Activity {
                 // Execute HTTP Post Request
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
-                String responseString = EntityUtils.toString(entity, "UTF-8");
-                int responseInt = Integer.parseInt(responseString);
-                return responseInt;
-
+                return EntityUtils.toString(entity, "UTF-8");
             }
-            catch (ClientProtocolException e) { return -4; }
-            catch (IOException e) { return -4; }
-            catch (Exception e) { return -4; }
+            catch (ClientProtocolException e) { return null; }
+            catch (IOException e) { return null; }
         }
 
         @Override
@@ -83,54 +82,60 @@ public class RegisterActivity extends Activity {
         }
 
         @Override
-        protected void onPostExecute(Integer result) {
-            if(result>0)
-            {
-                new AlertDialog.Builder(RegisterActivity.this)
-                        .setTitle("Registered")
-                        .setMessage("You are successfully registered!")
-                        .setCancelable(false)
-                        .setPositiveButton("Return to Login", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                                progressDialog.hide();
-                                RegisterActivity.this.finish();
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_info)
-                        .show();
-            }
-            else if(result == -1)
-            {
-                new AlertDialog.Builder(RegisterActivity.this)
-                        .setTitle("Email in use")
-                        .setMessage("The email is already in use. Please use another email.")
-                        .setCancelable(false)
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                                progressDialog.hide();
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
-            }
+        protected void onPostExecute(String jsonString) {
+            Log.d("Tom", jsonString);
+            if(jsonString == null)
+                showErrorDialog("Error", "Connection error.");
             else
             {
-                new AlertDialog.Builder(RegisterActivity.this)
-                        .setTitle("Error occur")
-                        .setMessage("Error code: " + result + ". Please contact admin.")
-                        .setCancelable(false)
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                                progressDialog.hide();
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
+                try
+                {
+                    JSONObject root = new JSONObject(jsonString);
+                    if(root.getInt("response")==1)
+                    {
+                        if(root.getInt("affacted_row")<=0)
+                            showErrorDialog("Email in use", "The email has been already used. Please use another email.");
+                        else
+                        {
+                            new AlertDialog.Builder(RegisterActivity.this)
+                                    .setTitle("Registered")
+                                    .setMessage("You are successfully registered!")
+                                    .setCancelable(false)
+                                    .setPositiveButton("Return to Login", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.cancel();
+                                            progressDialog.hide();
+                                            RegisterActivity.this.finish();
+                                        }
+                                    })
+                                    .setIcon(android.R.drawable.ic_dialog_info)
+                                    .show();
+                        }
+                    }
+                    else
+                        showErrorDialog("Error","Response error: "+root.getInt("response"));
+                }
+                catch (JSONException e)
+                {
+                    showErrorDialog("Error","Response format error.");
+                }
             }
+        }
 
+        private void showErrorDialog(String title, String message)
+        {
+            new AlertDialog.Builder(RegisterActivity.this)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setCancelable(false)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            progressDialog.hide();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
         }
     }
 
@@ -175,17 +180,4 @@ public class RegisterActivity extends Activity {
             new RegisterTask().execute(map);
         }
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
 }
