@@ -8,40 +8,56 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
+
+import java.util.ArrayList;
 
 
 public class CloudListActivity extends Activity implements CloudExplorer.Listener{
     private CloudBackupApplication app = null;
     private CloudExplorer explorer = null;
+    private CloudListAdapter adapter = null;
+    private ListView fileListView;
     private ProgressDialog progressDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cloud_list);
+        //set app
         app = (CloudBackupApplication)this.getApplication();
+        //set explorer
         explorer = CloudExplorer.instantiateFromSession(app.currentSession);
         explorer.addListener(this);
+        //set bar
         ActionBar actionBar = getActionBar();
         actionBar.show();
+        //set list view
+        fileListView = (ListView) findViewById(R.id.cloud_list);
+        //set progress dialog
+        progressDialog = new ProgressDialog(CloudListActivity.this);
+        progressDialog.setMessage("Retrieving list....");
+        progressDialog.setIndeterminate(false);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        //set explorer
+        explorer.start();
     }
 
     @Override
     protected void onStart()
     {
         super.onStart();
-        progressDialog = new ProgressDialog(CloudListActivity.this);
-        progressDialog.setMessage("Retrieving list....");
-        progressDialog.setIndeterminate(false);
-        progressDialog.setCancelable(false);
-        progressDialog.show();
-        explorer.start();
     }
 
     @Override
-    public void explorerStarted(String str) {
-        Log.d("Tom", str);
+    public void explorerStarted() {
         progressDialog.dismiss();
+    }
+
+    @Override
+    public void listUpdated(ArrayList<CloudExplorer.File> list) {
+        fileListView.setAdapter(new CloudListAdapter(this, list));
     }
 
     @Override
