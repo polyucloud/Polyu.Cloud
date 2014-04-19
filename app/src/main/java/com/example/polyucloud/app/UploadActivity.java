@@ -15,10 +15,13 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 
 import java.net.URL;
@@ -30,6 +33,7 @@ import java.util.Stack;
 
 public class UploadActivity extends Activity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
+    private CloudBackupApplication app = null;
     private ArrayList<HashMap> fileList = null;
     private ListView fileListView;
     public File uploadFile;
@@ -42,6 +46,7 @@ public class UploadActivity extends Activity implements View.OnClickListener, Ad
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        app = (CloudBackupApplication)this.getApplication();
         setContentView(R.layout.activity_upload_file);
         init();
         //Log.i("File want to upload:", uploadFile);
@@ -242,6 +247,8 @@ public class UploadActivity extends Activity implements View.OnClickListener, Ad
             long totalSize = uploadFile.length();
 
             try {
+                Log.i("UID", app.currentSession.UID + " ");
+                uploadPhpPage += "?uid="+app.currentSession.UID;
                 URL url = new URL(uploadPhpPage);
                 connection = (HttpURLConnection) url.openConnection();
 
@@ -287,6 +294,15 @@ public class UploadActivity extends Activity implements View.OnClickListener, Ad
 
                 int serverResponseCode = connection.getResponseCode();
                 String serverResponseMessage = connection.getResponseMessage();
+                InputStream stream = connection.getInputStream();
+                InputStreamReader isReader = new InputStreamReader(stream);
+                BufferedReader bufferedReader = new BufferedReader(isReader);
+                String result = "";
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    result += line;
+                }
+                Log.i("Server c:", result);
 
                 Log.i("Server Response Code:", ""+serverResponseCode);
                 Log.i("Server Response Msg:", serverResponseMessage);
