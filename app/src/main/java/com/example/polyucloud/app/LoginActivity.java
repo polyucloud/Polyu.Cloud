@@ -120,7 +120,7 @@ public class LoginActivity extends Activity{
 
         @Override
         protected void onPostExecute(String jsonString) {
-            Log.d("Tom", jsonString);
+            //Log.d("Tom", jsonString);
             if(jsonString == null)
                 showErrorDialog("Error", "Connection error.");
             else

@@ -92,8 +92,9 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         {
             case R.id.action_upload:
                 Intent intent = new Intent(this, UploadActivity.class);
+                intent.putExtra("currentLevel", explorer.getCurrentLevel());
+                intent.putExtra("parent", explorer.getCurrentParent());
                 startActivity(intent);
-
             case R.id.action_add_folder:
                 return true;
             default:
@@ -107,8 +108,8 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         if(selected.IS_DIR)
                 explorer.goToChild(i);
             else
-                Log.d("Tom", selected.NAME);
-
+            /* Download file code here */
+                Log.d("Tom", selected.PHYSICAL_PATH);
     }
 
     @Override

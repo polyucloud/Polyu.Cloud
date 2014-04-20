@@ -7,6 +7,7 @@ import android.app.Application;
  */
 public class CloudBackupApplication extends Application {
     public static final String PHP_ROOT_URL = "http://daisunhong.com/polyucloud/php/";
+    public static final String FILE_ROOT_URL = "http://daisunhong.com/polyucloud/user_files/";
 
     public Session currentSession = null;
 

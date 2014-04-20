@@ -38,6 +38,8 @@ public class UploadActivity extends Activity implements View.OnClickListener, Ad
     private ListView fileListView;
     public File uploadFile;
     Button testUp;
+    private int currentLevel;
+    private String parent;
 
     private FileListAdapter fileListAdapter = null;
 
@@ -49,6 +51,8 @@ public class UploadActivity extends Activity implements View.OnClickListener, Ad
         app = (CloudBackupApplication)this.getApplication();
         setContentView(R.layout.activity_upload_file);
         init();
+        currentLevel = getIntent().getExtras().getInt("currentLevel");
+        parent = getIntent().getExtras().getString("parent");
         //Log.i("File want to upload:", uploadFile);
     }
 
@@ -249,6 +253,8 @@ public class UploadActivity extends Activity implements View.OnClickListener, Ad
             try {
                 Log.i("UID", app.currentSession.UID + " ");
                 uploadPhpPage += "?uid="+app.currentSession.UID;
+                uploadPhpPage += "&parent="+parent;
+                uploadPhpPage += "&level="+currentLevel;
                 URL url = new URL(uploadPhpPage);
                 connection = (HttpURLConnection) url.openConnection();
 

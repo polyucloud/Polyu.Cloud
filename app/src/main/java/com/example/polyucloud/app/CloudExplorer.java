@@ -32,19 +32,26 @@ public class CloudExplorer {
     private static HashMap<Integer, CloudExplorer> explorers = null;
 
     private int UID;
-    private int currentLevel;
-    private String parent;
     private HashSet<Listener> listeners;
     private Stack<JSONArray> JSONArrayStack;
-
+    private Stack<String> parentStack;
 
     private CloudExplorer(int id)
     {
-        currentLevel = -1;
-        parent = null;
         UID = id;
         listeners = new HashSet<Listener>();
         JSONArrayStack = new Stack<JSONArray>();
+        parentStack = new Stack<String>();
+    }
+
+    public String getCurrentParent()
+    {
+        return parentStack.lastElement();
+    }
+
+    public int getCurrentLevel()
+    {
+        return parentStack.size()-1;
     }
 
     public static CloudExplorer instantiateFromSession(CloudBackupApplication.Session session)
@@ -61,9 +68,7 @@ public class CloudExplorer {
 
     public void start()
     {
-        if(currentLevel >= 0) return;
-        currentLevel = 0;
-        parent = "root";
+        if(JSONArrayStack.size() >0) return;
         new AsyncTask<Integer, Void, String>() {
             @Override
             protected void onPreExecute() {}
@@ -101,8 +106,6 @@ public class CloudExplorer {
                     JSONObject returnObj = new JSONObject(jsonString);
                     if(returnObj.getInt("response") != 1)
                     {
-                        currentLevel = -1;
-                        parent = null;
                         for(Listener l:listeners)
                             l.explorerStartFailed();
                     }
@@ -111,14 +114,12 @@ public class CloudExplorer {
                         for(Listener l:listeners)
                             l.explorerStarted();
                         CloudExplorer.this.JSONArrayStack.push( returnObj.getJSONArray("result"));
-                        CloudExplorer.this.goToChild(0);
+                        CloudExplorer.this.goToChild(0);//go to root
 
                     }
 
                 } catch (JSONException e)
                 {
-                    currentLevel = -1;
-                    parent = null;
                     for(Listener l:listeners)
                         l.explorerStartFailed();
                 }
@@ -130,6 +131,7 @@ public class CloudExplorer {
     {
         if(JSONArrayStack.size()<=2) return false;
         JSONArrayStack.pop();
+        parentStack.pop();
         try
         {
             JSONArray childs = JSONArrayStack.lastElement();
@@ -137,8 +139,9 @@ public class CloudExplorer {
             for(int j=0;j<childs.length();j++)
             {
                 String name = ((JSONObject) childs.get(j)).getString("name");
-                String path = "abc";
+                String path = "";
                 boolean is_dir = ((JSONObject) childs.get(j)).getString("type").equals("d");
+                if(!is_dir) path = ((JSONObject) childs.get(j)).getString("path");
                 File f = new File(name,path,is_dir);
                 files.add(f);
             }
@@ -159,7 +162,6 @@ public class CloudExplorer {
             JSONObject selection = (JSONObject)JSONArrayStack.lastElement().get(i);
             if(!selection.getString("type").equals("d"))
             {
-
             }
             else
             {
@@ -168,12 +170,14 @@ public class CloudExplorer {
                 for(int j=0;j<childs.length();j++)
                 {
                     String name = ((JSONObject) childs.get(j)).getString("name");
-                    String path = "abc";
+                    String path = "";
                     boolean is_dir = ((JSONObject) childs.get(j)).getString("type").equals("d");
+                    if(!is_dir) path = ((JSONObject) childs.get(j)).getString("path");
                     File f = new File(name,path,is_dir);
                     files.add(f);
                 }
                 JSONArrayStack.push(childs);
+                parentStack.push(selection.getString("name"));
                 for(Listener l:listeners)
                     l.listUpdated(files);
             }
