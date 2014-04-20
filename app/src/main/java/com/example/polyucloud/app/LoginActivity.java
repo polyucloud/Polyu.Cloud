@@ -3,13 +3,17 @@ package com.example.polyucloud.app;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.content.Intent;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -35,11 +39,31 @@ import java.util.List;
 public class LoginActivity extends Activity{
     private CloudBackupApplication app = null;
 
+    public LinearLayout layout ;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         app = (CloudBackupApplication)this.getApplication();
+        layout= (LinearLayout) findViewById(R.id.main_act_layout);
+
+        layout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                hideKeyboard(view);
+                return false;
+            }
+        });
+
+    }
+
+    protected void hideKeyboard(View view){
+        InputMethodManager in =(InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        in.hideSoftInputFromWindow(view.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
     public void register(View v) {
@@ -48,7 +72,7 @@ public class LoginActivity extends Activity{
 
     }
 
-    public void login(View v) {
+    public void login(View v){
         String email = ((EditText)findViewById(R.id.txtLogEmail)).getText().toString();
         String password = ((EditText)findViewById(R.id.txtLogPassword)).getText().toString();
         HashMap<String, String> map = new HashMap<String,String>();
