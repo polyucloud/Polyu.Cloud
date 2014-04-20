@@ -8,12 +8,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
 
-public class CloudListActivity extends Activity implements CloudExplorer.Listener{
+public class CloudListActivity extends Activity implements CloudExplorer.Listener, AdapterView.OnItemClickListener
+{
     private CloudBackupApplication app = null;
     private CloudExplorer explorer = null;
     private CloudListAdapter adapter = null;
@@ -34,6 +37,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         actionBar.show();
         //set list view
         fileListView = (ListView) findViewById(R.id.cloud_list);
+        fileListView.setOnItemClickListener(this);
         //set progress dialog
         progressDialog = new ProgressDialog(CloudListActivity.this);
         progressDialog.setMessage("Retrieving list....");
@@ -58,6 +62,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     @Override
     public void listUpdated(ArrayList<CloudExplorer.File> list) {
         fileListView.setAdapter(new CloudListAdapter(this, list));
+
     }
 
     @Override
@@ -83,5 +88,11 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        Log.d("Tom", "i="+i);
+        Log.d("Tom", "l="+l);
     }
 }
