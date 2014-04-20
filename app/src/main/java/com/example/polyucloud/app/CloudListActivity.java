@@ -92,7 +92,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Log.d("Tom", "i="+i);
+        Log.d("Tom", "i="+i);/**/
         Log.d("Tom", "l="+l);
     }
 }
