@@ -51,6 +51,7 @@ public class LoginActivity extends Activity{
         app = (CloudBackupApplication)this.getApplication();
         layout= (LinearLayout) findViewById(R.id.main_act_layout);
 
+        //close keyboard when touch other position
         layout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
