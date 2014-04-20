@@ -126,9 +126,9 @@ public class CloudExplorer {
         }.execute(UID);
     }
 
-    public void backToParent()
+    public boolean backToParent()
     {
-        if(JSONArrayStack.size()<=2) return;
+        if(JSONArrayStack.size()<=2) return false;
         JSONArrayStack.pop();
         try
         {
@@ -149,6 +149,7 @@ public class CloudExplorer {
             for(Listener l:listeners)
                 l.listUpdateFailed();
         }
+        return true;
     }
 
     public void goToChild(int i)

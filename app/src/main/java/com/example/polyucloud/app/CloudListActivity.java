@@ -113,6 +113,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
     @Override
     public void onBackPressed() {
-        explorer.backToParent();
+        if(!explorer.backToParent())
+            super.onBackPressed();
     }
 }
