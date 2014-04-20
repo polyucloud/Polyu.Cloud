@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Created by Tom on 4/17/14.
@@ -34,12 +35,16 @@ public class CloudExplorer {
     private int currentLevel;
     private String parent;
     private HashSet<Listener> listeners;
+    private Stack<JSONArray> JSONArrayStack;
+
 
     private CloudExplorer(int id)
     {
         currentLevel = -1;
+        parent = null;
         UID = id;
         listeners = new HashSet<Listener>();
+        JSONArrayStack = new Stack<JSONArray>();
     }
 
     public static CloudExplorer instantiateFromSession(CloudBackupApplication.Session session)
@@ -80,60 +85,110 @@ public class CloudExplorer {
                     HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
                 return EntityUtils.toString(entity, "UTF-8");
+                }
+                catch (ClientProtocolException e) { Log.d("Tom",e.toString()); return null; }
+                catch (IOException e) { Log.d("Tom",e.toString()); return null; }
             }
-            catch (ClientProtocolException e) { Log.d("Tom",e.toString()); return null; }
-            catch (IOException e) { Log.d("Tom",e.toString()); return null; }
-        }
 
-        @Override
-        protected void onProgressUpdate(Void... voids) {}
+            @Override
+            protected void onProgressUpdate(Void... voids) {}
 
-        @Override
-        protected void onPostExecute(String jsonString) {
-            for(Listener l:listeners)
-                l.explorerStarted();
-            CloudExplorer.this.notifyListChange(jsonString);
+            @Override
+            protected void onPostExecute(String jsonString) {
+                Log.d("Tom", jsonString);
+                try
+                {
+                    JSONObject returnObj = new JSONObject(jsonString);
+                    if(returnObj.getInt("response") != 1)
+                    {
+                        currentLevel = -1;
+                        parent = null;
+                        for(Listener l:listeners)
+                            l.explorerStartFailed();
+                    }
+                    else
+                    {
+                        for(Listener l:listeners)
+                            l.explorerStarted();
+                        CloudExplorer.this.JSONArrayStack.push( returnObj.getJSONArray("result"));
+                        CloudExplorer.this.goToChild(0);
+
+                    }
+
+                } catch (JSONException e)
+                {
+                    currentLevel = -1;
+                    parent = null;
+                    for(Listener l:listeners)
+                        l.explorerStartFailed();
+                }
             }
         }.execute(UID);
     }
 
     public void backToParent()
     {
-
-    }
-
-    public void goToChild(String name)
-    {
-
-    }
-
-    private void notifyListChange(String json)
-    {
+        if(JSONArrayStack.size()<=2) return;
+        JSONArrayStack.pop();
         try
         {
-            JSONObject returnObj = new JSONObject(json);
-            if(returnObj.getInt("response") != 1) return;
-            JSONObject rootObj =  (JSONObject) returnObj.getJSONArray("result").get(0);
-            JSONArray childs = rootObj.getJSONArray("child");
+            JSONArray childs = JSONArrayStack.lastElement();
             ArrayList<File> files = new ArrayList<File>();
-            for(int i=0;i<childs.length();i++)
+            for(int j=0;j<childs.length();j++)
             {
-                String name = ((JSONObject) childs.get(i)).getString("name");
+                String name = ((JSONObject) childs.get(j)).getString("name");
                 String path = "abc";
-                boolean is_dir = ((JSONObject) childs.get(i)).getString("type").equals("d");
+                boolean is_dir = ((JSONObject) childs.get(j)).getString("type").equals("d");
                 File f = new File(name,path,is_dir);
                 files.add(f);
             }
             for(Listener l:listeners)
                 l.listUpdated(files);
+        }catch (JSONException e)
+        {
+            for(Listener l:listeners)
+                l.listUpdateFailed();
         }
-        catch (JSONException e){}
+    }
+
+    public void goToChild(int i)
+    {
+        try
+        {
+            JSONObject selection = (JSONObject)JSONArrayStack.lastElement().get(i);
+            if(!selection.getString("type").equals("d"))
+            {
+
+            }
+            else
+            {
+                JSONArray childs = selection.getJSONArray("child");
+                ArrayList<File> files = new ArrayList<File>();
+                for(int j=0;j<childs.length();j++)
+                {
+                    String name = ((JSONObject) childs.get(j)).getString("name");
+                    String path = "abc";
+                    boolean is_dir = ((JSONObject) childs.get(j)).getString("type").equals("d");
+                    File f = new File(name,path,is_dir);
+                    files.add(f);
+                }
+                JSONArrayStack.push(childs);
+                for(Listener l:listeners)
+                    l.listUpdated(files);
+            }
+        }catch (JSONException e)
+        {
+            for(Listener l:listeners)
+                l.listUpdateFailed();
+        }
     }
 
     public static interface Listener
     {
         public void explorerStarted();
+        public void explorerStartFailed();
         public void listUpdated(ArrayList<File> list);
+        public void listUpdateFailed();
     }
 
     public static class File

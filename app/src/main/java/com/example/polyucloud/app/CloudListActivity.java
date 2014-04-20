@@ -20,6 +20,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     private CloudBackupApplication app = null;
     private CloudExplorer explorer = null;
     private CloudListAdapter adapter = null;
+    private ArrayList<CloudExplorer.File> list = null;
     private ListView fileListView;
     private ProgressDialog progressDialog = null;
 
@@ -60,8 +61,18 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     }
 
     @Override
+    public void explorerStartFailed() {
+
+    }
+
+    @Override
     public void listUpdated(ArrayList<CloudExplorer.File> list) {
-        fileListView.setAdapter(new CloudListAdapter(this, list));
+        fileListView.setAdapter(new CloudListAdapter(this, this.list = list));
+        fileListView.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void listUpdateFailed() {
 
     }
 
@@ -92,7 +103,16 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Log.d("Tom", "i="+i);/**/
-        Log.d("Tom", "l="+l);
+        CloudExplorer.File selected = (CloudExplorer.File)list.get(i);
+        if(selected.IS_DIR)
+                explorer.goToChild(i);
+            else
+                Log.d("Tom", selected.NAME);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        explorer.backToParent();
     }
 }
