@@ -93,7 +93,7 @@ public class RegisterActivity extends Activity {
                     JSONObject root = new JSONObject(jsonString);
                     if(root.getInt("response")==1)
                     {
-                        if(root.getInt("affacted_row")<=0)
+                        if(root.getInt("affected_row")<=0)
                             showErrorDialog("Email in use", "The email has been already used. Please use another email.");
                         else
                         {

@@ -2,14 +2,18 @@ package com.example.polyucloud.app;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -77,6 +81,27 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     }
 
     @Override
+    public void childAdded(String childName, boolean isDir) {
+        progressDialog.dismiss();
+    }
+
+    @Override
+    public void childAddFailed(String childName, boolean isDir) {
+        new AlertDialog.Builder(CloudListActivity.this)
+                .setTitle("Error")
+                .setMessage((isDir?"Folder ":"File ")+childName+" cannot be added.")
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        progressDialog.dismiss();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.list_content, menu);
@@ -96,10 +121,46 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 intent.putExtra("parent", explorer.getCurrentParent());
                 startActivity(intent);
             case R.id.action_add_folder:
+                addDirectory();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void addDirectory()
+    {
+        LayoutInflater li = LayoutInflater.from(this);
+        View promptsView = li.inflate(R.layout.add_directory_prompt, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setView(promptsView);
+        final EditText userInput = (EditText) promptsView.findViewById(R.id.add_directory_name);
+        // set dialog message
+        alertDialogBuilder
+            .setCancelable(false)
+            .setPositiveButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // get user input and set it to result
+                            // edit text
+                            progressDialog = new ProgressDialog(CloudListActivity.this);
+                            progressDialog.setMessage("Adding....");
+                            progressDialog.setIndeterminate(false);
+                            progressDialog.setCancelable(false);
+                            progressDialog.show();
+                            explorer.addChild(userInput.getText().toString(), true);
+                        }
+                    })
+            .setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        // show it
+        alertDialog.show();
     }
 
     @Override
@@ -109,7 +170,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 explorer.goToChild(i);
             else
             /* Download file code here */
-                Log.d("Tom", selected.PHYSICAL_PATH);
+                Log.d("Tom", app.FILE_ROOT_URL+selected.PHYSICAL_PATH);
     }
 
     @Override

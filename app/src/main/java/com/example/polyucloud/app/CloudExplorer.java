@@ -188,12 +188,76 @@ public class CloudExplorer {
         }
     }
 
+    public void addChild(final String name, final boolean isDir)
+    {
+        if(isDir && name != null && name.length()>0)
+        new AsyncTask<Object, Void, String>() {
+            @Override
+            protected void onPreExecute() {}
+
+            @Override
+            protected String doInBackground(Object... values) {
+                HttpPost httppost = new HttpPost(CloudBackupApplication.PHP_ROOT_URL+"add_folder.php");
+                HttpClient httpclient = new DefaultHttpClient();
+                try {
+                    // Add your data
+                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(4);
+                    nameValuePairs.add(new BasicNameValuePair("id", ""+values[0]));
+                    nameValuePairs.add(new BasicNameValuePair("parent", ""+values[1]));
+                    nameValuePairs.add(new BasicNameValuePair("level", ""+values[2]));
+                    nameValuePairs.add(new BasicNameValuePair("folder_name", ""+values[3]));
+                    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                    // Execute HTTP Post Request
+                    HttpResponse response = httpclient.execute(httppost);
+                    HttpEntity entity = response.getEntity();
+                    return EntityUtils.toString(entity, "UTF-8");
+                }
+                catch (ClientProtocolException e) { return null; }
+                catch (IOException e) { return null; }
+            }
+
+            @Override
+            protected void onProgressUpdate(Void... voids) {}
+
+            @Override
+            protected void onPostExecute(String jsonString) {
+                Log.d("Tom", jsonString);
+                try
+                {
+                    JSONObject returnObj = new JSONObject(jsonString);
+                    if(returnObj.getInt("response") != 1)
+                        for(Listener l:listeners)
+                            l.childAddFailed(name, isDir);
+                    else
+                    {
+                        if(returnObj.getInt("affected_row") >0)
+                        {
+                            for(Listener l:listeners)
+                                l.childAdded(name, isDir);
+                        }
+                        else
+                            for(Listener l:listeners)
+                                l.childAddFailed(name, isDir);
+                    }
+
+                } catch (JSONException e)
+                {
+                    for(Listener l:listeners)
+                        l.childAddFailed(name, isDir);
+                }
+            }
+        }.execute(UID, getCurrentParent(), getCurrentLevel(), name);
+    }
+
     public static interface Listener
     {
         public void explorerStarted();
         public void explorerStartFailed();
         public void listUpdated(ArrayList<File> list);
         public void listUpdateFailed();
+        public void childAdded(String childName, boolean isDir);
+        public void childAddFailed(String childName, boolean isDir);
     }
 
     public static class File
