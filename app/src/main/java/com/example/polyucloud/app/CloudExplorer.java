@@ -298,7 +298,7 @@ public class CloudExplorer {
             {}
         }
     }
-
+    /** new function **/
     public void deleteChildOffline(String name)
     {
         JSONArray childs = JSONArrayStack.lastElement();
