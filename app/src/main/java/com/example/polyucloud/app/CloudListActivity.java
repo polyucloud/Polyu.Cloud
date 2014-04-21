@@ -6,7 +6,9 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +18,11 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 
@@ -27,7 +34,9 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     private ArrayList<CloudExplorer.File> list = null;
     private ListView fileListView;
     private ProgressDialog progressDialog = null;
-
+    private File mainfolder=null;
+    private String downloadurl=null;
+    public ProgressDialog progressBar=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +52,16 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         //set list view
         fileListView = (ListView) findViewById(R.id.cloud_list);
         fileListView.setOnItemClickListener(this);
+
+        progressBar = new ProgressDialog(CloudListActivity.this);
+        progressBar.setMessage("Downloading");
+        //progressBar.setMax(100);
+        progressBar.setCancelable(false);
+        progressBar.setIndeterminate(false); //Disable Indeterminate effect
+        progressBar.setProgressStyle(progressBar.STYLE_HORIZONTAL);
+        progressBar.hide();
+
+
         //set progress dialog
         progressDialog = new ProgressDialog(CloudListActivity.this);
         progressDialog.setMessage("Retrieving list....");
@@ -171,10 +190,20 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         CloudExplorer.File selected = (CloudExplorer.File)list.get(i);
         if(selected.IS_DIR)
-                explorer.goToChild(i);
-            else
-            /* Download file code here */
-                Log.d("Tom", app.FILE_ROOT_URL+selected.PHYSICAL_PATH);
+            explorer.goToChild(i);
+        else
+        {
+            Log.d("Tom", app.FILE_ROOT_URL+selected.PHYSICAL_PATH);
+            mainfolder = new File(Environment.getExternalStorageDirectory()+"/polyucloud");
+            if(!mainfolder.isDirectory()){
+                Log.d("Tom","open main directory");
+                mainfolder.mkdir();
+            }
+            Log.d("Tom","see mian"+ mainfolder);
+            //DownloadActivit dlTask=new DownloadActivit(mainfolder,app.FILE_ROOT_URL+selected.PHYSICAL_PATH,CloudListActivity.this);
+            downloadurl=app.FILE_ROOT_URL+selected.PHYSICAL_PATH;
+            comfirmDownload();
+        }
     }
 
     @Override
@@ -199,4 +228,129 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         firstTimeResume = false;
         super.onResume();
     }
+
+
+
+    private void comfirmDownload() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(CloudListActivity.this);
+        // Setting Dialog Title
+        alertDialog.setTitle("Confirm download...");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("Do you want to download this file?");
+
+        // Setting Positive "Yes" Button
+        alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // User pressed YES button. Write Logic Here
+                FileDownloadTask dl=new FileDownloadTask(downloadurl);
+                dl.execute();
+            }
+        });
+
+        // Setting Negative "NO" Button
+        alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // User pressed No button. Write Logic Here
+                //Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+    }
+
+
+
+
+
+
+
+
+    class FileDownloadTask extends AsyncTask<String,Integer,Void> {
+
+        File storagedir=new File(Environment.getExternalStorageDirectory()+"/polyucloud");
+
+        String fileURL;
+        FileDownloadTask( String fileURL){
+            this.fileURL=fileURL;
+        }
+
+        @Override
+        protected void onPreExecute() {
+
+            super.onPreExecute();
+            Log.d("Tom", "start to download");
+            progressBar.show();
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            int fileSize,currentDataSize;
+            Log.d("Tom","getting file on "+fileURL);
+            try{
+                Log.d("Tom","main is "+storagedir);
+                URL fileurl=new URL(fileURL);
+                HttpURLConnection connection=(HttpURLConnection)fileurl.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setDoOutput(true);
+                connection.connect();
+
+                fileSize=connection.getContentLength();
+                currentDataSize=0;
+                String fileName=fileURL.substring(fileURL.lastIndexOf("/"));
+
+
+                File checkfile=new File(storagedir+"/"+fileName);
+                File orginal=new File(storagedir+"/"+fileName);
+                int i=0;
+                do{
+                    if(i!=0){
+                        String temp=orginal.toString().substring(0,orginal.toString().lastIndexOf(".")-1)+"("+i+")"+orginal.toString().substring(orginal.toString().lastIndexOf("."));
+                        checkfile=new File(temp);
+                    }
+
+                    i++;
+                    Log.d("Tom","check file="+checkfile.toString());
+                }while(checkfile.exists());
+
+
+
+                FileOutputStream outputStream=new FileOutputStream(checkfile);
+                Log.d("Tom","main is "+storagedir);
+                InputStream inputStream=connection.getInputStream();
+
+                byte[] buffer=new byte[1024];
+                int len1 = 0;
+                long total = 0;
+
+                while((len1=inputStream.read(buffer))>0){
+                    total+=len1;
+                    publishProgress(((int)((total*100)/fileSize)));
+                    outputStream.write(buffer, 0, len1);
+                }
+                outputStream.flush();
+                outputStream.close();
+                connection.disconnect();
+
+            }catch(Exception ex){
+                Log.d("Tom", "exception "+ ex.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            progressBar.setProgress(values[0]);
+
+            //Log.d("Tom", values[0]+"");
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            progressBar.dismiss();
+            Log.d("Tom", " Download finished");
+        }
+    }
+
 }
