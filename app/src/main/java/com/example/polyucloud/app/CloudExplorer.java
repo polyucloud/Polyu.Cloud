@@ -269,6 +269,36 @@ public class CloudExplorer {
         }.execute(UID, getCurrentParent(), getCurrentLevel(), name);
     }
 
+    public void addChildOffline(String name, boolean isDir, String path)
+    {
+        if(!isDir && name != null && name.length()>0)
+        {
+            try
+            {
+                JSONObject newChild = new JSONObject();
+                newChild.put("name", name);
+                newChild.put("type", "f");
+                newChild.put("path", path);
+                JSONArrayStack.lastElement().put(newChild);
+                JSONArray childs = JSONArrayStack.lastElement();
+                ArrayList<File> files = new ArrayList<File>();
+                for(int j=0;j<childs.length();j++)
+                {
+                    String n = ((JSONObject) childs.get(j)).getString("name");
+                    String p = "";
+                    boolean is_dir = ((JSONObject) childs.get(j)).getString("type").equals("d");
+                    if(!is_dir) p = ((JSONObject) childs.get(j)).getString("path");
+                    File f = new File(n,p,is_dir);
+                    files.add(f);
+                }
+                for(Listener l:listeners)
+                    l.listUpdated(files);
+            }
+            catch(JSONException e)
+            {}
+        }
+    }
+
     public void update () {
 
         //listeners = new HashSet<Listener>();

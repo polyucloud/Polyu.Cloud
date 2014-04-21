@@ -121,6 +121,7 @@ public class LoginActivity extends Activity{
         @Override
         protected void onPostExecute(String jsonString) {
             //Log.d("Tom", jsonString);
+            progressDialog.dismiss();
             if(jsonString == null)
                 showErrorDialog("Error", "Connection error.");
             else
@@ -140,7 +141,6 @@ public class LoginActivity extends Activity{
                                     userObj.getString("email"),
                                     userObj.getString("first_name"),
                                     userObj.getString("last_name"));
-                            progressDialog.dismiss();
                             Intent intent = new Intent(LoginActivity.this, CloudListActivity.class);
                             startActivity(intent);
                         }

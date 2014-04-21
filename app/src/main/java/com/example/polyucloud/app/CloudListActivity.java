@@ -153,7 +153,6 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // User pressed YES button. Write Logic Here
-                FileDownloadTask dl=new FileDownloadTask(downloadurl);
                 new DeletFileTask().execute(deleteFile);
             }
         });
@@ -366,8 +365,8 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 ArrayList<String> siblings = new ArrayList<String>();
                 for(int i=0;i<list.size();i++)
                     siblings.add(list.get(i).NAME);
-                intent.putExtra("siblings", siblings);//
-                startActivity(intent);
+                intent.putExtra("siblings", siblings);
+                startActivityForResult(intent, 1);
                 return true;
             case R.id.action_add_folder:
                 addDirectory();
@@ -378,6 +377,16 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == 1 && data.hasExtra("newFileList"))
+        {
+            ArrayList<String> newFileList = data.getStringArrayListExtra("newFileList");
+            for(int i=0;i<newFileList.size();i+=3)
+                explorer.addChildOffline(newFileList.get(i), false ,newFileList.get(i+1));
         }
     }
 
@@ -426,7 +435,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         if(!explorer.backToParent())
             super.onBackPressed();
     }
-
+/*
     private boolean firstTimeResume = true;
 
     @Override
@@ -443,7 +452,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         firstTimeResume = false;
         super.onResume();
     }
-
+*/
 
 
     private void comfirmDownload() {

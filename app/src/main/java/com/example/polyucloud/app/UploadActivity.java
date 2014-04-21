@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Bundle;
@@ -14,6 +15,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -41,6 +45,7 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
     private int currentLevel;
     private String parent;
     private ArrayList<String> siblings = new ArrayList<String>();
+    private ArrayList<String> newFileList = new ArrayList<String>();
 
     private FileListAdapter fileListAdapter = null;
 
@@ -113,9 +118,19 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
             fileList.clear();
             obtainSDfiles( f );
             fileListAdapter.notifyDataSetChanged();
-        } else {
-            super.onBackPressed();
-        }
+        } else
+            //super.onBackPressed();
+            finish();
+    }
+
+    @Override
+    public void finish() {
+        // Prepare data intent
+        Intent data = new Intent();
+        data.putStringArrayListExtra("newFileList", newFileList);
+        // Activity finished ok, return the data
+        setResult(RESULT_OK, data);
+        super.finish();
     }
 
     @Override
@@ -160,6 +175,23 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
             obtainSDfiles( f );
             fileListAdapter.notifyDataSetChanged();
         } else {
+            String name = (String)fileList.get(i).get("f_name");
+            for(int jj=0;jj<siblings.size();jj++)
+                if(siblings.get(jj).equals(name))
+                {
+                    new AlertDialog.Builder(UploadActivity.this)
+                            .setTitle("Conflict")
+                            .setMessage("There is a file with same file name "+name+" on the cloud.")
+                            .setCancelable(false)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+                    return;
+                }
             uploadFile = f;
             comfirmUpload();
         }
@@ -196,7 +228,7 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
     }
 
     /** AsyncTask to upload file to server **/
-    class FileUploadTask extends AsyncTask<Object, Integer, Void> {
+    class FileUploadTask extends AsyncTask<Object, Integer, String> {
 
         private ProgressDialog progressDialog = null;
         private File uploadFile;
@@ -227,7 +259,7 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
         }
 
         @Override
-        protected Void doInBackground(Object... objects) {
+        protected String doInBackground(Object... objects) {
 
             //upFile = new File(uploadFile);
 
@@ -304,6 +336,7 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
                 fileInputStream.close();
                 outputStream.flush();
                 outputStream.close();
+                return result;
 
             } catch (Exception ex) {
                 Log.e("Upload file error: ", ex.getMessage());
@@ -317,12 +350,44 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            try {
-                progressDialog.dismiss();
-            } catch (Exception e) {
-                Log.e("Upload file error: ", e.getMessage());
+        protected void onPostExecute(String jsonString) {
+            try
+            {
+                Log.d("Tom", jsonString);
+                JSONObject root = new JSONObject(jsonString);
+                if(root.getInt("response")==1)
+                {
+                    String name = uploadFile.getName();
+                    String storage_path = root.getString("storage_path");
+                    String type = "f";
+                    newFileList.add(name);
+                    newFileList.add(storage_path);
+                    newFileList.add(type);
+                }
+                else
+                    showErrorDialog("Error","Response error: "+root.getInt("response"));
             }
+            catch (JSONException e)
+            {
+                showErrorDialog("Error","Response format error.");
+            }
+            progressDialog.dismiss();
+        }
+
+        private void showErrorDialog(String title, String message)
+        {
+            new AlertDialog.Builder(UploadActivity.this)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setCancelable(false)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            progressDialog.dismiss();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
         }
     }
 
