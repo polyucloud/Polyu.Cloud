@@ -146,14 +146,14 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(CloudListActivity.this);
         // Setting Dialog Title
-        alertDialog.setTitle("Confirm download...");
+        alertDialog.setTitle("Confirm delete...");
 
         // Setting Dialog Message
         if(deleteType==1){
-            alertDialog.setMessage("Do you want to download this file?");
+            alertDialog.setMessage("Do you want to delete this file?");
         }
         else{
-            alertDialog.setMessage("Do you want to download this folder?\nEvery files inside will be also deleted");
+            alertDialog.setMessage("Do you want to delete this folder?\nEvery files inside will be also deleted");
         }
 
         // Setting Positive "Yes" Button
@@ -353,6 +353,8 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 return true;
             case R.id.action_access_download:
                 //List the downloaded file
+                Intent intentListFile = new Intent(this, ListDownloadedFileActivity.class);
+                startActivity(intentListFile);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
