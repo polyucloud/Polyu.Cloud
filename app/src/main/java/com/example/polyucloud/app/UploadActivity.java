@@ -228,7 +228,6 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
         protected Void doInBackground(Object... objects) {
 
             //upFile = new File(uploadFile);
-            //ttt
 
             long length = 0;
             int progress;
