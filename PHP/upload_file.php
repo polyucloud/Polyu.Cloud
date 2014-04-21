@@ -1,8 +1,15 @@
 <?php
     $uid = $_GET['uid'];
+    $parent = $_GET['parent'];
+    $level = $_GET['level'];
+
+
     $ran_num 	= rand(0, 999999);
 	$file_ext = get_extension($_FILES['uploadedfile']['name']);
-	$file_name = preg_replace("/\\.[^.\\s]{3,4}$/", "", $_FILES['uploadedfile']['name']) ;
+	$file_name = preg_replace("/\\.[^.\\s]{3,4}$/", "", $_FILES['uploadedfile']['name']);
+
+
+	//$file_name = array_shift(explode('.', $_FILES['uploadedfile']['name']));
     $new_file_name = md5($file_name).'-'.$ran_num.'.'.$file_ext;
 
 
@@ -14,7 +21,7 @@
 
 
                $con = mysqli_connect('localhost','daisunhong_ad','4PPJQBDv','daisunhong_db') or die(json_encode(array('response' => -2)));
-               echo $sql = "INSERT INTO polyu_files (user_id,parent_folder,level,file_name,file_suffix,storage_path,create_date,last_update,version_no) VALUES ($uid,'root',0,'$file_name','$file_ext','$new_file_name', NOW(), NOW(), 1)";
+               echo $sql = "INSERT INTO polyu_files (user_id,parent_folder,level,file_name,file_suffix,storage_path,create_date,last_update,version_no) VALUES ($uid,'$parent',$level,'$file_name','$file_ext','$new_file_name', NOW(), NOW(), 1)";
                mysqli_query($con, $sql) or die(mysqli_error($con));
 
 
