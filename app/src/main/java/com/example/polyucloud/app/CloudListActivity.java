@@ -53,7 +53,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     private File mainfolder=null;
     private String downloadurl=null;
     public ProgressDialog progressBar=null;
-
+    private int deleteType;
     public CloudExplorer getCorrespondingExplorer()
     {
         return explorer;
@@ -124,6 +124,13 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         CloudExplorer.File selected = (CloudExplorer.File)list.get(i);
         if(selected.IS_DIR){
             //del all file in folder
+            String deletefoldername=selected.NAME;
+            Log.d("Tom",deletefoldername+" "+app.currentSession.UID);
+            HashMap<String, String> map = new HashMap<String,String>();
+            map.put("UID",app.currentSession.UID+"");
+            map.put("delfilename" , deletefoldername);
+            deleteType=0;
+            comfirmDelete(map);
         }
         else
         {
@@ -133,7 +140,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             HashMap<String, String> map = new HashMap<String,String>();
             map.put("UID",app.currentSession.UID+"");
             map.put("delfilename" , deletefilename.substring(0,deletefilename.lastIndexOf(".")));
-            //new DeletFileTask().execute(map);
+            deleteType=1;
             comfirmDelete(map);
         }
         return true;
@@ -147,13 +154,20 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.setTitle("Confirm download...");
 
         // Setting Dialog Message
-        alertDialog.setMessage("Do you want to download this file?");
+        if(deleteType==1){
+            alertDialog.setMessage("Do you want to download this file?");
+        }
+        else{
+            alertDialog.setMessage("Do you want to download this folder?\nEvery files inside will be also deleted");
+        }
 
         // Setting Positive "Yes" Button
         alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // User pressed YES button. Write Logic Here
+
                 new DeletFileTask().execute(deleteFile);
+
             }
         });
 
@@ -168,6 +182,8 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         // Showing Alert Message
         alertDialog.show();
     }
+
+
 
 
     class DeletFileTask extends AsyncTask<HashMap<String, String>, Void, String> {
@@ -186,7 +202,13 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         protected String doInBackground(HashMap<String, String>... maps) {
             HashMap<String, String> data = maps[0];
             HttpClient httpclient = new DefaultHttpClient();
-            HttpPost httppost = new HttpPost(app.PHP_ROOT_URL+"deleteFile.php");
+            HttpPost httppost;
+            if(deleteType==1){
+                httppost = new HttpPost(app.PHP_ROOT_URL+"deleteFile.php");
+            }
+            else{
+                httppost = new HttpPost(app.PHP_ROOT_URL+"deleteFolder.php");
+            }
             try {
                 // Add your data
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
@@ -294,7 +316,8 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
 
 
-    private String downloadFileNmae;
+
+
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -312,7 +335,6 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             Log.d("Tom","see mian"+ mainfolder);
             //DownloadActivit dlTask=new DownloadActivit(mainfolder,app.FILE_ROOT_URL+selected.PHYSICAL_PATH,CloudListActivity.this);
             downloadurl=app.FILE_ROOT_URL+selected.PHYSICAL_PATH;
-            downloadFileNmae = selected.NAME;
             comfirmDownload();
         }
     }
@@ -365,28 +387,17 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 ArrayList<String> siblings = new ArrayList<String>();
                 for(int i=0;i<list.size();i++)
                     siblings.add(list.get(i).NAME);
-                intent.putExtra("siblings", siblings);
-                startActivityForResult(intent, 1);
+                intent.putExtra("siblings", siblings);//
+                startActivity(intent);
                 return true;
             case R.id.action_add_folder:
                 addDirectory();
                 return true;
             case R.id.action_access_download:
-                Intent intent1 = new Intent(this, ListDownloadedFileActivity.class);
-                startActivity(intent1);
+                //List the downloaded file
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && requestCode == 1 && data.hasExtra("newFileList"))
-        {
-            ArrayList<String> newFileList = data.getStringArrayListExtra("newFileList");
-            for(int i=0;i<newFileList.size();i+=3)
-                explorer.addChildOffline(newFileList.get(i), false ,newFileList.get(i+1));
         }
     }
 
@@ -435,7 +446,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         if(!explorer.backToParent())
             super.onBackPressed();
     }
-/*
+
     private boolean firstTimeResume = true;
 
     @Override
@@ -452,7 +463,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         firstTimeResume = false;
         super.onResume();
     }
-*/
+
 
 
     private void comfirmDownload() {
@@ -467,7 +478,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // User pressed YES button. Write Logic Here
-                FileDownloadTask dl=new FileDownloadTask(downloadurl, downloadFileNmae);
+                FileDownloadTask dl=new FileDownloadTask(downloadurl);
                 dl.execute();
             }
         });
@@ -496,9 +507,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         File storagedir=new File(Environment.getExternalStorageDirectory()+"/polyucloud");
 
         String fileURL;
-        String fileName;
-        FileDownloadTask( String fileURL, String fileName){
-            this.fileName = fileName;
+        FileDownloadTask( String fileURL){
             this.fileURL=fileURL;
         }
 
@@ -524,7 +533,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
                 fileSize=connection.getContentLength();
                 currentDataSize=0;
-                //String fileName=fileURL.substring(fileURL.lastIndexOf("/"));
+                String fileName=fileURL.substring(fileURL.lastIndexOf("/"));
 
 
                 File checkfile=new File(storagedir+"/"+fileName);
