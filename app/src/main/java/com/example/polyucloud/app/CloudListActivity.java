@@ -435,25 +435,6 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         if(!explorer.backToParent())
             super.onBackPressed();
     }
-/*
-    private boolean firstTimeResume = true;
-
-    @Override
-    protected void onResume() {
-        if (!firstTimeResume) {
-            Log.i("Eric", "I'm resume....");
-            progressDialog = new ProgressDialog(CloudListActivity.this);
-            progressDialog.setMessage("Retrieving list....");
-            progressDialog.setIndeterminate(false);
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-            explorer.update();
-        }
-        firstTimeResume = false;
-        super.onResume();
-    }
-*/
-
 
     private void comfirmDownload() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(CloudListActivity.this);
