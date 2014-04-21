@@ -164,8 +164,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         // Setting Positive "Yes" Button
         alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                // User pressed YES button. Write Logic Here
-
+                // User pressed YES button. Write Logic Her
                 new DeletFileTask().execute(deleteFile);
 
             }
