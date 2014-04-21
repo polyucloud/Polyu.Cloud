@@ -54,7 +54,7 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
         init();
         currentLevel = getIntent().getExtras().getInt("currentLevel");
         parent = getIntent().getExtras().getString("parent");
-        siblings = getIntent().getExtras().getStringArrayList("siblings");
+        siblings = getIntent().getExtras().getStringArrayList("siblings");//
         //Log.i("File want to upload:", uploadFile);
     }
 

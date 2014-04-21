@@ -147,7 +147,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 ArrayList<String> siblings = new ArrayList<String>();
                 for(int i=0;i<list.size();i++)
                     siblings.add(list.get(i).NAME);
-                intent.putExtra("siblings", siblings);
+                intent.putExtra("siblings", siblings);//
                 startActivity(intent);
                 return true;
             case R.id.action_add_folder:
