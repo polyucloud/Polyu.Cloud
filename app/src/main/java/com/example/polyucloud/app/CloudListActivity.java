@@ -53,6 +53,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     private File mainfolder=null;
     private String downloadurl=null;
     public ProgressDialog progressBar=null;
+    private final HashMap<String, String> datatdelete = new HashMap<String,String>();
 
     public CloudExplorer getCorrespondingExplorer()
     {
@@ -130,15 +131,44 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
             String deletefilename=selected.NAME;
             Log.d("Tom",deletefilename.substring(0,deletefilename.lastIndexOf("."))+" "+app.currentSession.UID);
-            HashMap<String, String> map = new HashMap<String,String>();
-            map.put("UID",app.currentSession.UID+"");
-            map.put("delfilename" , deletefilename.substring(0,deletefilename.lastIndexOf(".")));
-            new DeletFileTask().execute(map);
-            //comfirmDelete();
+            //HashMap<String, String> map = new HashMap<String,String>();
+            datatdelete.put("UID",app.currentSession.UID+"");
+            datatdelete.put("delfilename" , deletefilename.substring(0,deletefilename.lastIndexOf(".")));
+
+            comfirmDelete();
         }
         return true;
     }
 
+
+    private void comfirmDelete(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(CloudListActivity.this);
+        // Setting Dialog Title
+        alertDialog.setTitle("Confirm deletion...");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("Do you want to delete this file?");
+
+        // Setting Positive "Yes" Button
+        alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // User pressed YES button. Write Logic Here
+                FileDownloadTask dl=new FileDownloadTask(downloadurl);
+                new DeletFileTask().execute(datatdelete);
+            }
+        });
+
+        // Setting Negative "NO" Button
+        alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // User pressed No button. Write Logic Here
+                //Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+    }
 
 
     class DeletFileTask extends AsyncTask<HashMap<String, String>, Void, String> {
@@ -191,24 +221,19 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                     JSONObject root = new JSONObject(jsonString);
                     if(root.getInt("response")==1)
                     {
-                        if(root.getInt("affected_row")<=0)
-                            showErrorDialog("Delete Fail", "File Deleteion Fail.");
-                        else
-                        {
-                            new AlertDialog.Builder(CloudListActivity.this)
-                                    .setTitle("Deleted")
-                                    .setMessage("Fail delete success")
-                                    .setCancelable(false)
-                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.cancel();
-                                            progressDialog.dismiss();
+                        new AlertDialog.Builder(CloudListActivity.this)
+                                .setTitle("Deleted")
+                                .setMessage("File delete successful")
+                                .setCancelable(false)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                        progressDialog.dismiss();
 
-                                        }
-                                    })
-                                    .setIcon(android.R.drawable.ic_dialog_info)
-                                    .show();
-                        }
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_info)
+                                .show();
                     }
                     else
                         showErrorDialog("Error","Response error: "+root.getInt("response"));
@@ -289,6 +314,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             comfirmDownload();
         }
     }
+
 
 
     @Override
