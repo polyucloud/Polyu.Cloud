@@ -10,5 +10,6 @@
     <string name="title_activity_register">Register</string>
     <string name="register_now"><u>Register Now!</u></string>
     <string name="title_activity_download">DownloadActivity</string>
+    <string name="title_activity_list_downloaded_file">Downloaded files</string>
 
 </resources>
