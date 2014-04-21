@@ -84,28 +84,28 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
             File[] files = dirs.listFiles();
 
             if(files!=null)
-            for (File f:files) {
-                HashMap item = new HashMap();
+                for (File f:files) {
+                    HashMap item = new HashMap();
 
-                item.put("f_name", f.getName());
-                item.put("f_path", f);
-                item.put("f_parent", dirs);
+                    item.put("f_name", f.getName());
+                    item.put("f_path", f);
+                    item.put("f_parent", dirs);
 
-                if(f.isDirectory()) {
-                    item.put("f_type", "DIR");
-                } else {
-                    item.put("f_type", "FILE");
+                    if(f.isDirectory()) {
+                        item.put("f_type", "DIR");
+                    } else {
+                        item.put("f_type", "FILE");
+                    }
+                    fileList.add(item);
+                    Log.i("File:", f.toString());
                 }
-                fileList.add(item);
-                Log.i("File:", f.toString());
-            }
         }
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.upload_file, menu);
         return true;

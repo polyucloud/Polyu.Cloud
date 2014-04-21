@@ -50,14 +50,11 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     private ArrayList<CloudExplorer.File> list = null;
     private ListView fileListView;
     private ProgressDialog progressDialog = null;
+
     private File mainfolder=null;
     private String downloadurl=null;
     public ProgressDialog progressBar=null;
     private int deleteType;
-    public CloudExplorer getCorrespondingExplorer()
-    {
-        return explorer;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,8 +112,6 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         fileListView.setAdapter(new CloudListAdapter(this, this.list = list));
         fileListView.setOnItemClickListener(this);
         fileListView.setOnItemLongClickListener(this);
-
-
     }
 
     public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -130,7 +125,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             map.put("UID",app.currentSession.UID+"");
             map.put("delfilename" , deletefoldername);
             deleteType=0;
-            comfirmDelete(map);
+            confirmDelete(map);
         }
         else
         {
@@ -141,12 +136,12 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             map.put("UID",app.currentSession.UID+"");
             map.put("delfilename" , deletefilename.substring(0,deletefilename.lastIndexOf(".")));
             deleteType=1;
-            comfirmDelete(map);
+            confirmDelete(map);
         }
         return true;
     }
 
-    private void comfirmDelete( HashMap<String, String> deletedata) {
+    private void confirmDelete( HashMap<String, String> deletedata) {
         final HashMap<String, String> deleteFile = deletedata;
 
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(CloudListActivity.this);
@@ -165,7 +160,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // User pressed YES button. Write Logic Her
-                new DeletFileTask().execute(deleteFile);
+                new DeleteFileTask().execute(deleteFile);
 
             }
         });
@@ -182,10 +177,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.show();
     }
 
-
-
-
-    class DeletFileTask extends AsyncTask<HashMap<String, String>, Void, String> {
+    class DeleteFileTask extends AsyncTask<HashMap<String, String>, Void, String> {
         private ProgressDialog progressDialog = null;
         @Override
         protected void onPreExecute()
@@ -285,39 +277,6 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         CloudExplorer.File selected = (CloudExplorer.File)list.get(i);
@@ -387,7 +346,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 for(int i=0;i<list.size();i++)
                     siblings.add(list.get(i).NAME);
                 intent.putExtra("siblings", siblings);//
-                startActivity(intent);
+                startActivityForResult(intent, 1);
                 return true;
             case R.id.action_add_folder:
                 addDirectory();
@@ -397,6 +356,16 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == 1 && data.hasExtra("newFileList"))
+        {
+            ArrayList<String> newFileList = data.getStringArrayListExtra("newFileList");
+            for(int i=0;i<newFileList.size();i+=3)
+                explorer.addChildOffline(newFileList.get(i), false ,newFileList.get(i+1));
         }
     }
 
@@ -435,35 +404,11 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.show();
     }
 
-
-
-
-
-
     @Override
     public void onBackPressed() {
         if(!explorer.backToParent())
             super.onBackPressed();
     }
-
-    private boolean firstTimeResume = true;
-
-    @Override
-    protected void onResume() {
-        if (!firstTimeResume) {
-            Log.i("Eric", "I'm resume....");
-            progressDialog = new ProgressDialog(CloudListActivity.this);
-            progressDialog.setMessage("Retrieving list....");
-            progressDialog.setIndeterminate(false);
-            progressDialog.setCancelable(false);
-            progressDialog.show();
-            explorer.update();
-        }
-        firstTimeResume = false;
-        super.onResume();
-    }
-
-
 
     private void comfirmDownload() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(CloudListActivity.this);
@@ -493,13 +438,6 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         // Showing Alert Message
         alertDialog.show();
     }
-
-
-
-
-
-
-
 
     class FileDownloadTask extends AsyncTask<String,Integer,Void> {
 
