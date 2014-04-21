@@ -212,6 +212,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 // Execute HTTP Post Request
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
+                explorer.deleteChildOffline(data.get("delfilename"));
                 return EntityUtils.toString(entity, "UTF-8");
             }
             catch (ClientProtocolException e) { return null; }
@@ -236,7 +237,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
                         new AlertDialog.Builder(CloudListActivity.this)
                                 .setTitle("Deleted")
-                                .setMessage("Fail delete success")
+                                .setMessage("File delete success")
                                 .setCancelable(false)
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
