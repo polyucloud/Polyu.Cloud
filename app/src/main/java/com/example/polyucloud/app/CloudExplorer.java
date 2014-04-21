@@ -299,6 +299,39 @@ public class CloudExplorer {
         }
     }
 
+    public void deleteChildOffline(String name)
+    {
+        JSONArray childs = JSONArrayStack.lastElement();
+        try
+        {
+            for(int i=0;i<childs.length();i++)
+            {
+                String n = ((JSONObject) childs.get(i)).getString("name");
+                if(name.equals(n))
+                {
+                    childs.remove(i);
+                    break;
+                }
+            }
+            ArrayList<File> files = new ArrayList<File>();
+            for(int j=0;j<childs.length();j++)
+            {
+                String n = ((JSONObject) childs.get(j)).getString("name");
+                String p = "";
+                boolean is_dir = ((JSONObject) childs.get(j)).getString("type").equals("d");
+                if(!is_dir) p = ((JSONObject) childs.get(j)).getString("path");
+                File f = new File(n,p,is_dir);
+                files.add(f);
+            }
+            for(Listener l:listeners)
+                l.listUpdated(files);
+        }
+        catch(JSONException e)
+        {
+
+        }
+    }
+
     public static interface Listener
     {
         public void explorerStarted();
