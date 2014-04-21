@@ -7,25 +7,10 @@
         android:id="@+id/sd_file_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:scrollbars="vertical"
-        android:layout_weight="5">
+        android:scrollbars="vertical" >
 
         </ListView>
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        >
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Up"
-            android:id="@+id/test_upload"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
-
-        </RelativeLayout>
 
 </LinearLayout>

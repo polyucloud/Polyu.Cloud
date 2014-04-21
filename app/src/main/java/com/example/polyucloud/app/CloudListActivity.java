@@ -120,6 +120,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 intent.putExtra("currentLevel", explorer.getCurrentLevel());
                 intent.putExtra("parent", explorer.getCurrentParent());
                 startActivity(intent);
+                return true;
             case R.id.action_add_folder:
                 addDirectory();
                 return true;
@@ -177,5 +178,22 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     public void onBackPressed() {
         if(!explorer.backToParent())
             super.onBackPressed();
+    }
+
+    private boolean firstTimeResume = true;
+
+    @Override
+    protected void onResume() {
+        if (!firstTimeResume) {
+            Log.i("Eric", "I'm resume....");
+            progressDialog = new ProgressDialog(CloudListActivity.this);
+            progressDialog.setMessage("Retrieving list....");
+            progressDialog.setIndeterminate(false);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+            explorer.update();
+        }
+        firstTimeResume = false;
+        super.onResume();
     }
 }

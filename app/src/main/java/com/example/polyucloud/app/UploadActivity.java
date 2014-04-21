@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Stack;
 
 
-public class UploadActivity extends Activity implements View.OnClickListener, AdapterView.OnItemClickListener {
+public class UploadActivity extends Activity implements AdapterView.OnItemClickListener {
 
     private CloudBackupApplication app = null;
     private ArrayList<HashMap> fileList = null;
@@ -60,8 +60,6 @@ public class UploadActivity extends Activity implements View.OnClickListener, Ad
         fileList = new ArrayList<HashMap>();
         fileListView = (ListView) findViewById(R.id.sd_file_list);
         fileListView.setOnItemClickListener(this);
-        testUp = (Button) findViewById(R.id.test_upload);
-        testUp.setOnClickListener(this);
 
         File sdcard = Environment.getExternalStorageDirectory();
         obtainSDfiles(sdcard);
@@ -130,19 +128,6 @@ public class UploadActivity extends Activity implements View.OnClickListener, Ad
         return super.onOptionsItemSelected(item);
     }
 
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.test_upload:
-
-                /** Call AsyncTask to upload file at background **/
-                //FileUploadTask fileUploadTask = new FileUploadTask(uploadFile);
-                //fileUploadTask.execute();
-                //test_ListFile();
-                break;
-        }
-    }
 
     private void test_ListFile() {
         File sdcard = Environment.getExternalStorageDirectory();
@@ -232,6 +217,7 @@ public class UploadActivity extends Activity implements View.OnClickListener, Ad
             Log.i("Infor:", "start background task to upload file");
             progressDialog = new ProgressDialog(UploadActivity.this);
             progressDialog.setMessage("Uploading");
+            progressDialog.setCancelable(false);
             progressDialog.setIndeterminate(false); //Disable Indeterminate effect
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setProgress(0);
