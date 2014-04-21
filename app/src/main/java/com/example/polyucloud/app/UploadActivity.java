@@ -40,6 +40,7 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
     Button testUp;
     private int currentLevel;
     private String parent;
+    private ArrayList<String> siblings = new ArrayList<String>();
 
     private FileListAdapter fileListAdapter = null;
 
@@ -53,6 +54,7 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
         init();
         currentLevel = getIntent().getExtras().getInt("currentLevel");
         parent = getIntent().getExtras().getString("parent");
+        siblings = getIntent().getExtras().getStringArrayList("siblings");
         //Log.i("File want to upload:", uploadFile);
     }
 

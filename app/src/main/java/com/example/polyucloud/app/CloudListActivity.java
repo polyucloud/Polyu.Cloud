@@ -37,6 +37,12 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     private File mainfolder=null;
     private String downloadurl=null;
     public ProgressDialog progressBar=null;
+
+    public CloudExplorer getCorrespondingExplorer()
+    {
+        return explorer;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,6 +144,10 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 Intent intent = new Intent(this, UploadActivity.class);
                 intent.putExtra("currentLevel", explorer.getCurrentLevel());
                 intent.putExtra("parent", explorer.getCurrentParent());
+                ArrayList<String> siblings = new ArrayList<String>();
+                for(int i=0;i<list.size();i++)
+                    siblings.add(list.get(i).NAME);
+                intent.putExtra("siblings", siblings);
                 startActivity(intent);
                 return true;
             case R.id.action_add_folder:
