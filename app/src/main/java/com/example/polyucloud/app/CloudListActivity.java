@@ -133,12 +133,42 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             HashMap<String, String> map = new HashMap<String,String>();
             map.put("UID",app.currentSession.UID+"");
             map.put("delfilename" , deletefilename.substring(0,deletefilename.lastIndexOf(".")));
-            new DeletFileTask().execute(map);
-            //comfirmDelete();
+            //new DeletFileTask().execute(map);
+            comfirmDelete(map);
         }
         return true;
     }
 
+    private void comfirmDelete( HashMap<String, String> deletedata) {
+        final HashMap<String, String> deleteFile = deletedata;
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(CloudListActivity.this);
+        // Setting Dialog Title
+        alertDialog.setTitle("Confirm download...");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("Do you want to download this file?");
+
+        // Setting Positive "Yes" Button
+        alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // User pressed YES button. Write Logic Here
+                FileDownloadTask dl=new FileDownloadTask(downloadurl);
+                new DeletFileTask().execute(deleteFile);
+            }
+        });
+
+        // Setting Negative "NO" Button
+        alertDialog.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // User pressed No button. Write Logic Here
+                //Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+    }
 
 
     class DeletFileTask extends AsyncTask<HashMap<String, String>, Void, String> {
