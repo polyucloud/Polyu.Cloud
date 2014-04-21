@@ -3,11 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.polyucloud.app.CloudListActivity" >
     <item android:id="@+id/action_upload"
-        android:icon="@drawable/upload"
+        android:icon="@drawable/ic_action_upload"
         android:showAsAction="always"
         android:title="Upload file"/>
     <item android:id="@+id/action_add_folder"
-        android:icon="@drawable/add_folder"
+        android:icon="@drawable/ic_action_new"
         android:showAsAction="always"
         android:title="Add folder"/>
+    <item android:id="@+id/action_access_download"
+        android:icon="@drawable/ic_action_sd_storage"
+        android:showAsAction="always"
+        android:title="My download"/>
 </menu>

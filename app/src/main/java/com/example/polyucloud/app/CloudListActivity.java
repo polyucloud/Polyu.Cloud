@@ -124,6 +124,9 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             case R.id.action_add_folder:
                 addDirectory();
                 return true;
+            case R.id.action_access_download:
+                //List the downloaded file
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
