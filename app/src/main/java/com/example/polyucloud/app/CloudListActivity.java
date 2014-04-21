@@ -18,15 +18,31 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
-public class CloudListActivity extends Activity implements CloudExplorer.Listener, AdapterView.OnItemClickListener
+public class CloudListActivity extends Activity implements CloudExplorer.Listener, AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener
 {
     private CloudBackupApplication app = null;
     private CloudExplorer explorer = null;
@@ -98,7 +114,182 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     public void listUpdated(ArrayList<CloudExplorer.File> list) {
         fileListView.setAdapter(new CloudListAdapter(this, this.list = list));
         fileListView.setOnItemClickListener(this);
+        fileListView.setOnItemLongClickListener(this);
+
+
     }
+
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        Log.d("Tom", "del ready");
+        CloudExplorer.File selected = (CloudExplorer.File)list.get(i);
+        if(selected.IS_DIR){
+            //del all file in folder
+        }
+        else
+        {
+
+            String deletefilename=selected.NAME;
+            Log.d("Tom",deletefilename.substring(0,deletefilename.lastIndexOf("."))+" "+app.currentSession.UID);
+            HashMap<String, String> map = new HashMap<String,String>();
+            map.put("UID",app.currentSession.UID+"");
+            map.put("delfilename" , deletefilename.substring(0,deletefilename.lastIndexOf(".")));
+            new DeletFileTask().execute(map);
+            //comfirmDelete();
+        }
+        return true;
+    }
+
+
+
+    class DeletFileTask extends AsyncTask<HashMap<String, String>, Void, String> {
+        private ProgressDialog progressDialog = null;
+        @Override
+        protected void onPreExecute()
+        {
+            progressDialog = new ProgressDialog(CloudListActivity.this);
+            progressDialog.setMessage("Deleting File....");
+            progressDialog.setIndeterminate(false);
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(HashMap<String, String>... maps) {
+            HashMap<String, String> data = maps[0];
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost httppost = new HttpPost(app.PHP_ROOT_URL+"deleteFile.php");
+            try {
+                // Add your data
+                List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+                Log.d("Tom",data.get("UID"));
+                Log.d("Tom",data.get("delfilename"));
+                nameValuePairs.add(new BasicNameValuePair("UID", data.get("UID")));
+                nameValuePairs.add(new BasicNameValuePair("delfilename", data.get("delfilename")));
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                // Execute HTTP Post Request
+                HttpResponse response = httpclient.execute(httppost);
+                HttpEntity entity = response.getEntity();
+                return EntityUtils.toString(entity, "UTF-8");
+            }
+            catch (ClientProtocolException e) { return null; }
+            catch (IOException e) { return null; }
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... voids) {}
+
+        @Override
+        protected void onPostExecute(String jsonString) {
+            Log.d("Tom", jsonString);
+            if(jsonString == null)
+                showErrorDialog("Error", "Connection error.");
+            else
+            {
+                try
+                {
+                    JSONObject root = new JSONObject(jsonString);
+                    if(root.getInt("response")==1)
+                    {
+                        if(root.getInt("affected_row")<=0)
+                            showErrorDialog("Delete Fail", "File Deleteion Fail.");
+                        else
+                        {
+                            new AlertDialog.Builder(CloudListActivity.this)
+                                    .setTitle("Deleted")
+                                    .setMessage("Fail delete success")
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.cancel();
+                                            progressDialog.dismiss();
+
+                                        }
+                                    })
+                                    .setIcon(android.R.drawable.ic_dialog_info)
+                                    .show();
+                        }
+                    }
+                    else
+                        showErrorDialog("Error","Response error: "+root.getInt("response"));
+                }
+                catch (JSONException e)
+                {
+                    showErrorDialog("Error","Response format error.");
+                }
+            }
+        }
+
+        private void showErrorDialog(String title, String message)
+        {
+            new AlertDialog.Builder(CloudListActivity.this)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setCancelable(false)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            progressDialog.dismiss();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        CloudExplorer.File selected = (CloudExplorer.File)list.get(i);
+        if(selected.IS_DIR)
+            explorer.goToChild(i);
+        else
+        {
+            Log.d("Tom", app.FILE_ROOT_URL+selected.PHYSICAL_PATH);
+            mainfolder = new File(Environment.getExternalStorageDirectory()+"/polyucloud");
+            if(!mainfolder.isDirectory()){
+                Log.d("Tom","open main directory");
+                mainfolder.mkdir();
+            }
+            Log.d("Tom","see mian"+ mainfolder);
+            //DownloadActivit dlTask=new DownloadActivit(mainfolder,app.FILE_ROOT_URL+selected.PHYSICAL_PATH,CloudListActivity.this);
+            downloadurl=app.FILE_ROOT_URL+selected.PHYSICAL_PATH;
+            comfirmDownload();
+        }
+    }
+
 
     @Override
     public void listUpdateFailed() {
@@ -196,25 +387,10 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.show();
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        CloudExplorer.File selected = (CloudExplorer.File)list.get(i);
-        if(selected.IS_DIR)
-            explorer.goToChild(i);
-        else
-        {
-            Log.d("Tom", app.FILE_ROOT_URL+selected.PHYSICAL_PATH);
-            mainfolder = new File(Environment.getExternalStorageDirectory()+"/polyucloud");
-            if(!mainfolder.isDirectory()){
-                Log.d("Tom","open main directory");
-                mainfolder.mkdir();
-            }
-            Log.d("Tom","see mian"+ mainfolder);
-            //DownloadActivit dlTask=new DownloadActivit(mainfolder,app.FILE_ROOT_URL+selected.PHYSICAL_PATH,CloudListActivity.this);
-            downloadurl=app.FILE_ROOT_URL+selected.PHYSICAL_PATH;
-            comfirmDownload();
-        }
-    }
+
+
+
+
 
     @Override
     public void onBackPressed() {
@@ -362,5 +538,6 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             Log.d("Tom", " Download finished");
         }
     }
+
 
 }
