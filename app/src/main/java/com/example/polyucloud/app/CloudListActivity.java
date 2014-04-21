@@ -144,8 +144,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 addDirectory();
                 return true;
             case R.id.action_access_download:
-                Intent intent1 = new Intent(this, ListDownloadedFileActivity.class);
-                startActivity(intent1);
+                //List the downloaded file
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -187,7 +186,6 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.show();
     }
 
-    private String downloadFileName;
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         CloudExplorer.File selected = (CloudExplorer.File)list.get(i);
@@ -204,7 +202,6 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             Log.d("Tom","see mian"+ mainfolder);
             //DownloadActivit dlTask=new DownloadActivit(mainfolder,app.FILE_ROOT_URL+selected.PHYSICAL_PATH,CloudListActivity.this);
             downloadurl=app.FILE_ROOT_URL+selected.PHYSICAL_PATH;
-            downloadFileName = selected.NAME;
             comfirmDownload();
         }
     }
@@ -246,7 +243,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // User pressed YES button. Write Logic Here
-                FileDownloadTask dl=new FileDownloadTask(downloadurl, downloadFileName);
+                FileDownloadTask dl=new FileDownloadTask(downloadurl);
                 dl.execute();
             }
         });
@@ -275,11 +272,8 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         File storagedir=new File(Environment.getExternalStorageDirectory()+"/polyucloud");
 
         String fileURL;
-        String fileName;
-
-        FileDownloadTask( String fileURL, String fileName){
+        FileDownloadTask( String fileURL){
             this.fileURL=fileURL;
-            this.fileName = fileName;
         }
 
         @Override
@@ -304,7 +298,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
                 fileSize=connection.getContentLength();
                 currentDataSize=0;
-                //String fileName=fileURL.substring(fileURL.lastIndexOf("/"));
+                String fileName=fileURL.substring(fileURL.lastIndexOf("/"));
 
 
                 File checkfile=new File(storagedir+"/"+fileName);
