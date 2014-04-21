@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.polyucloud.app" >
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
+        android:name="com.example.polyucloud.app.CloudBackupApplication"
         android:allowBackup="true"
         android:icon="@drawable/cloud"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:name=".CloudBackupApplication">
+        android:theme="@style/AppTheme" >
         <activity
             android:name="com.example.polyucloud.app.LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -22,13 +26,14 @@
             android:label="@string/title_activity_register" >
         </activity>
         <activity
-            android:name=".CloudListActivity"
-            android:logo="@drawable/cloud"
-            android:label="@string/title_activity_list_content">
+            android:name="com.example.polyucloud.app.CloudListActivity"
+            android:label="@string/title_activity_list_content"
+            android:logo="@drawable/cloud" >
         </activity>
         <activity
-            android:name=".UploadActivity"
+            android:name="com.example.polyucloud.app.UploadActivity"
             android:label="@string/title_activity_upload_file" >
         </activity>
     </application>
+
 </manifest>
