@@ -64,11 +64,11 @@ public class FileListAdapter extends BaseAdapter {
 
         String type = (String) fileList.get(i).get("f_type");
         if(type.equalsIgnoreCase("DIR")) {
-            viewTag.thumb.setImageResource(R.drawable.ic_action_good);
+            viewTag.thumb.setImageResource(R.drawable.ic_folder);
         } else {
             String suffix = android.webkit.MimeTypeMap.getFileExtensionFromUrl((String) fileList.get(i).get("f_name"));
             if(!checkImage(suffix))
-                viewTag.thumb.setImageResource(R.drawable.ic_launcher);
+                viewTag.thumb.setImageResource(R.drawable.ic_file);
             else {
                 File ff = (File) fileList.get(i).get("f_path");
                 byte[] imageData = null;

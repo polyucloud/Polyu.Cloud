@@ -65,9 +65,9 @@ public class CloudListAdapter extends BaseAdapter {
         viewTag.fileName.setText(files.get(i).NAME);
 
         if(files.get(i).IS_DIR) {
-            viewTag.thumb.setImageResource(R.drawable.ic_action_good);
+            viewTag.thumb.setImageResource(R.drawable.ic_folder);
         } else {
-                viewTag.thumb.setImageResource(R.drawable.ic_launcher);
+                viewTag.thumb.setImageResource(R.drawable.ic_file);
         }
         return view;
     }
