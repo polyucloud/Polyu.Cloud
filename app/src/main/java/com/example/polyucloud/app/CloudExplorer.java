@@ -236,6 +236,24 @@ public class CloudExplorer {
                         {
                             for(Listener l:listeners)
                                 l.childAdded(name, isDir);
+                            JSONObject newChild = new JSONObject();
+                            newChild.put("name", name);
+                            newChild.put("type", "d");
+                            newChild.put("child", new JSONArray());
+                            JSONArrayStack.lastElement().put(newChild);
+                            JSONArray childs = JSONArrayStack.lastElement();
+                            ArrayList<File> files = new ArrayList<File>();
+                            for(int j=0;j<childs.length();j++)
+                            {
+                                String name = ((JSONObject) childs.get(j)).getString("name");
+                                String path = "";
+                                boolean is_dir = ((JSONObject) childs.get(j)).getString("type").equals("d");
+                                if(!is_dir) path = ((JSONObject) childs.get(j)).getString("path");
+                                File f = new File(name,path,is_dir);
+                                files.add(f);
+                            }
+                            for(Listener l:listeners)
+                                l.listUpdated(files);
                         }
                         else
                             for(Listener l:listeners)
