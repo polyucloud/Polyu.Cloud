@@ -34,6 +34,10 @@
             android:name="com.example.polyucloud.app.UploadActivity"
             android:label="@string/title_activity_upload_file" >
         </activity>
+        <activity
+            android:name="com.example.polyucloud.app.ListDownloadedFileActivity"
+            android:label="@string/title_activity_list_downloaded_file" >
+        </activity>
     </application>
 
 </manifest>
