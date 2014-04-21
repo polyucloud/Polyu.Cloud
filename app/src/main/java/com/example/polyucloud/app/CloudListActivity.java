@@ -191,24 +191,21 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                     JSONObject root = new JSONObject(jsonString);
                     if(root.getInt("response")==1)
                     {
-                        if(root.getInt("affected_row")<=0)
-                            showErrorDialog("Delete Fail", "File Deleteion Fail.");
-                        else
-                        {
-                            new AlertDialog.Builder(CloudListActivity.this)
-                                    .setTitle("Deleted")
-                                    .setMessage("Fail delete success")
-                                    .setCancelable(false)
-                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.cancel();
-                                            progressDialog.dismiss();
 
-                                        }
-                                    })
-                                    .setIcon(android.R.drawable.ic_dialog_info)
-                                    .show();
-                        }
+                        new AlertDialog.Builder(CloudListActivity.this)
+                                .setTitle("Deleted")
+                                .setMessage("Fail delete success")
+                                .setCancelable(false)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                        progressDialog.dismiss();
+
+                                    }
+                                })
+                                .setIcon(android.R.drawable.ic_dialog_info)
+                                .show();
+
                     }
                     else
                         showErrorDialog("Error","Response error: "+root.getInt("response"));

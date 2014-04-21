@@ -1,4 +1,5 @@
 <?php
+
 	isset($_POST['email']) or die(json_encode(array('response' => -3)));
 	isset($_POST['password']) or die(json_encode(array('response' => -3)));
 	$email = $_POST['email'];
