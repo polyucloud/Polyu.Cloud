@@ -298,6 +298,29 @@ public class CloudExplorer {
             {}
         }
     }
+
+
+    public JSONArray removeJsonItem(JSONArray jsonArray, int index) {
+
+        JSONArray output = new JSONArray();
+        int len = jsonArray.length();
+        for (int i = 0; i < len; i++)   {
+            if (i != index) {
+                try {
+                    Log.i("Eric", i + " " + jsonArray.get(i));
+                    output.put(jsonArray.get(i));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        }
+        return output;
+        //return this; If you need the input array in case of a failed attempt to remove an item.
+    }
+
+
+
     /** new function **/
     public void deleteChildOffline(String name)
     {
@@ -309,7 +332,14 @@ public class CloudExplorer {
                 String n = ((JSONObject) childs.get(i)).getString("name");
                 if(name.equals(n))
                 {
+                    Log.i("Eric", "I'm in deleteChild");
                     childs.remove(i);
+                    /**childs = removeJsonItem(childs, i);
+
+                    for(int j = 0; j < childs.length(); j++) {
+                        Log.i("Eric11111", j + " " + childs.get(j));
+                    }**/
+
                     break;
                 }
             }

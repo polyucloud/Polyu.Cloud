@@ -55,6 +55,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
     private String downloadurl=null;
     public ProgressDialog progressBar=null;
     private int deleteType;
+    private String currentDelfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +121,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         if(selected.IS_DIR){
             //del all file in folder
             String deletefoldername=selected.NAME;
+            currentDelfile = deletefoldername;
             Log.d("Tom",deletefoldername+" "+app.currentSession.UID);
             HashMap<String, String> map = new HashMap<String,String>();
             map.put("UID",app.currentSession.UID+"");
@@ -131,6 +133,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         {
 
             String deletefilename=selected.NAME;
+            currentDelfile = deletefilename;
             Log.d("Tom",deletefilename.substring(0,deletefilename.lastIndexOf("."))+" "+app.currentSession.UID);
             HashMap<String, String> map = new HashMap<String,String>();
             map.put("UID",app.currentSession.UID+"");
@@ -179,6 +182,8 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
     class DeleteFileTask extends AsyncTask<HashMap<String, String>, Void, String> {
         private ProgressDialog progressDialog = null;
+        private HashMap<String, String> data = null;
+
         @Override
         protected void onPreExecute()
         {
@@ -192,14 +197,17 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         @Override
         protected String doInBackground(HashMap<String, String>... maps) {
             HashMap<String, String> data = maps[0];
+            //data = maps[0];
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost;
             if(deleteType==1){
                 httppost = new HttpPost(app.PHP_ROOT_URL+"deleteFile.php");
+
             }
             else{
                 httppost = new HttpPost(app.PHP_ROOT_URL+"deleteFolder.php");
             }
+
             try {
                 // Add your data
                 List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
@@ -212,7 +220,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 // Execute HTTP Post Request
                 HttpResponse response = httpclient.execute(httppost);
                 HttpEntity entity = response.getEntity();
-                explorer.deleteChildOffline(data.get("delfilename"));
+                //explorer.deleteChildOffline(data.get("delfilename"));
                 return EntityUtils.toString(entity, "UTF-8");
             }
             catch (ClientProtocolException e) { return null; }
@@ -225,6 +233,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         @Override
         protected void onPostExecute(String jsonString) {
             Log.d("Tom", jsonString);
+
             if(jsonString == null)
                 showErrorDialog("Error", "Connection error.");
             else
@@ -234,7 +243,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                     JSONObject root = new JSONObject(jsonString);
                     if(root.getInt("response")==1)
                     {
-
+                        explorer.deleteChildOffline(currentDelfile);
                         new AlertDialog.Builder(CloudListActivity.this)
                                 .setTitle("Deleted")
                                 .setMessage("File delete success")
@@ -277,6 +286,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         }
     }
 
+    String file_name;
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -294,6 +304,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
             Log.d("Tom","see mian"+ mainfolder);
             //DownloadActivit dlTask=new DownloadActivit(mainfolder,app.FILE_ROOT_URL+selected.PHYSICAL_PATH,CloudListActivity.this);
             downloadurl=app.FILE_ROOT_URL+selected.PHYSICAL_PATH;
+            file_name=selected.NAME;
             comfirmDownload();
         }
     }
@@ -425,7 +436,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 // User pressed YES button. Write Logic Here
-                FileDownloadTask dl=new FileDownloadTask(downloadurl);
+                FileDownloadTask dl=new FileDownloadTask(downloadurl,file_name);
                 dl.execute();
             }
         });
@@ -447,8 +458,11 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         File storagedir=new File(Environment.getExternalStorageDirectory()+"/polyucloud");
 
         String fileURL;
-        FileDownloadTask( String fileURL){
+        String fileName;
+        FileDownloadTask( String fileURL, String fileName){
+
             this.fileURL=fileURL;
+            this.fileName=fileName;
         }
 
         @Override
@@ -473,7 +487,8 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
 
                 fileSize=connection.getContentLength();
                 currentDataSize=0;
-                String fileName=fileURL.substring(fileURL.lastIndexOf("/"));
+                //String fileName=fileURL.substring(fileURL.lastIndexOf("/"));
+                //String fileName=
 
 
                 File checkfile=new File(storagedir+"/"+fileName);
