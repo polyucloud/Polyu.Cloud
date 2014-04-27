@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -453,7 +454,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         alertDialog.show();
     }
 
-    class FileDownloadTask extends AsyncTask<String,Integer,Void> {
+    class FileDownloadTask extends AsyncTask<String,Integer,String> {
 
         File storagedir=new File(Environment.getExternalStorageDirectory()+"/polyucloud");
 
@@ -474,7 +475,7 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         }
 
         @Override
-        protected Void doInBackground(String... strings) {
+        protected String doInBackground(String... strings) {
             int fileSize,currentDataSize;
             Log.d("Tom","getting file on "+fileURL);
             try{
@@ -524,9 +525,11 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
                 connection.disconnect();
 
             }catch(Exception ex){
-                Log.d("Tom", "exception "+ ex.getMessage());
+                return null;
+                //Log.d("Tom", "exception "+ ex.getMessage());
+                //Toast.makeText(CloudListActivity.this, "Download error. Please check network connection and try again.", Toast.LENGTH_LONG).show();
             }
-            return null;
+            return "ok";
         }
 
         @Override
@@ -537,7 +540,10 @@ public class CloudListActivity extends Activity implements CloudExplorer.Listene
         }
 
         @Override
-        protected void onPostExecute(Void v) {
+        protected void onPostExecute(String str) {
+            if (str == null)
+                Toast.makeText(CloudListActivity.this, "Download error. Please check network connection and try again.", Toast.LENGTH_LONG).show();
+
             progressBar.dismiss();
             Log.d("Tom", " Download finished");
         }

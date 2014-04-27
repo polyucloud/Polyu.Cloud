@@ -11,5 +11,6 @@
     <string name="register_now"><u>Register Now!</u></string>
     <string name="title_activity_download">DownloadActivity</string>
     <string name="title_activity_list_downloaded_file">Downloaded files</string>
+    <string name="title_activity_drag_upload">Drag file to upload</string>
 
 </resources>

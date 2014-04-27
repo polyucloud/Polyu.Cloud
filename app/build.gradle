@@ -19,7 +19,7 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:19.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile files('lib/httpmime-4.3.3.jar')
+    compile 'com.android.support:appcompat-v7:19.+'
 }

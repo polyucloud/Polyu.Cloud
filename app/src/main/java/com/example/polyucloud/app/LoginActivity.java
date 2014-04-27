@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -41,7 +42,8 @@ public class LoginActivity extends Activity{
 
     public LinearLayout layout ;
 
-
+    private SharedPreferences prefs;
+    public static String LOGIN_PREFS = "login_prefs";
 
 
     @Override
@@ -50,6 +52,11 @@ public class LoginActivity extends Activity{
         setContentView(R.layout.activity_login);
         app = (CloudBackupApplication)this.getApplication();
         layout= (LinearLayout) findViewById(R.id.main_act_layout);
+
+        prefs = getSharedPreferences(LOGIN_PREFS, 0);
+        String saveEmail = prefs.getString("email", null);
+        if(saveEmail!=null)
+            ((EditText)findViewById(R.id.txtLogEmail)).setText(saveEmail);
 
         //close keyboard when touch other position
         layout.setOnTouchListener(new View.OnTouchListener() {
@@ -135,7 +142,11 @@ public class LoginActivity extends Activity{
                             showErrorDialog("Error", "Email or password is wrong.");
                         else
                         {
+
                             JSONObject userObj = root.getJSONArray("result").getJSONObject(0);
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putString("email", ((EditText)findViewById(R.id.txtLogEmail)).getText().toString());
+                            editor.commit();
                             app.currentSession = new CloudBackupApplication.Session(
                                     userObj.getInt("id"),
                                     userObj.getString("email"),

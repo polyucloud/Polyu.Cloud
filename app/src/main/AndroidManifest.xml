@@ -15,7 +15,7 @@
         <activity
             android:name="com.example.polyucloud.app.LoginActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,23 +25,28 @@
         <activity
             android:name="com.example.polyucloud.app.RegisterActivity"
             android:label="@string/title_activity_register"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.example.polyucloud.app.CloudListActivity"
             android:label="@string/title_activity_list_content"
             android:logo="@drawable/cloud"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.example.polyucloud.app.UploadActivity"
             android:label="@string/title_activity_upload_file"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name="com.example.polyucloud.app.ListDownloadedFileActivity"
             android:label="@string/title_activity_list_downloaded_file"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.example.polyucloud.app.DragUpload"
+            android:label="@string/title_activity_drag_upload" >
+
         </activity>
     </application>
 

@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -193,6 +194,13 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
                     return;
                 }
             uploadFile = f;
+
+            /**Intent intent = new Intent(UploadActivity.this, DragUpload.class);
+            intent.putExtra("path", uploadFile.getAbsolutePath());
+            intent.putExtra("parent", parent);
+            intent.putExtra("currentLevel", currentLevel);
+            startActivity(intent);**/
+
             comfirmUpload();
         }
     }
@@ -339,9 +347,11 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
                 return result;
 
             } catch (Exception ex) {
-                Log.e("Upload file error: ", ex.getMessage());
+                return null;
+                //Log.e("Upload file error: ", ex.getMessage());
+                //Toast.makeText(UploadActivity.this, "Upload error. Please check network connection and try again.", Toast.LENGTH_LONG).show();
             }
-            return null;
+            //return null;
         }
 
         @Override
@@ -351,6 +361,11 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
 
         @Override
         protected void onPostExecute(String jsonString) {
+            progressDialog.dismiss();
+            if(jsonString==null) {
+                Toast.makeText(UploadActivity.this, "Upload error. Please check network connection and try again.", Toast.LENGTH_LONG).show();
+                return;
+            }
             try
             {
                 Log.d("Tom", jsonString);
@@ -371,7 +386,7 @@ public class UploadActivity extends Activity implements AdapterView.OnItemClickL
             {
                 showErrorDialog("Error","Response format error.");
             }
-            progressDialog.dismiss();
+
         }
 
         private void showErrorDialog(String title, String message)
